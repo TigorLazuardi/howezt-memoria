@@ -1,3 +1,4 @@
+import { Message } from "discord.js";
 import { PREFIX } from "./prefix";
 
 /**
@@ -10,4 +11,8 @@ export function hasCommand(content: string, cmd: string) {
     } else {
         return "";
     }
+}
+
+export async function notImplementedYet(message: Message, cmd: string) {
+    await message.channel.send("not implemented yet");
 }

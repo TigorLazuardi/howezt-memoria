@@ -20,7 +20,7 @@ export default function (client: Client) {
                 await commands(message);
             }
         } catch (e) {
-            console.log(e);
+            await message.channel.send(e?.message || e || "something happened with the bot");
         }
     });
 }

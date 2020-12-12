@@ -5,6 +5,10 @@ export const client = new discord.Client();
 
 client.once("ready", () => {
     console.log("Discord bot running");
+    client.user?.setActivity({
+        name: "!hm_help",
+        type: "PLAYING",
+    });
 });
 
 export default (token: string) => {
@@ -12,3 +16,10 @@ export default (token: string) => {
 };
 
 message(client);
+
+client.on("error", console.error);
+
+process.on("SIGNIT", async () => {
+    await client.destroy();
+    process.exit(0);
+});

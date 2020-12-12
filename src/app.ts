@@ -19,7 +19,7 @@ message(client);
 
 client.on("error", console.error);
 
-process.on("SIGNIT", async () => {
+process.on("SIGINT", async () => {
     await client.destroy();
     process.exit(0);
 });

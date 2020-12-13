@@ -1,6 +1,6 @@
 import app from "./app";
-import nodeVault, { VaultOptions } from "node-vault";
 import elasticApmNode from "elastic-apm-node";
+import vault from "./infrastructures/vault";
 
 interface HoweztMemoriaConfig {
     bot: {
@@ -12,13 +12,6 @@ interface HoweztMemoriaConfig {
         server_url: string;
     };
 }
-
-const options: VaultOptions = {
-    token: process.env.VAULT_TOKEN,
-    endpoint: process.env.VAULT_HOST,
-};
-
-const vault = nodeVault(options);
 
 vault.read("kv/howezt-memoria").then((data: HoweztMemoriaConfig) => {
     elasticApmNode.start({

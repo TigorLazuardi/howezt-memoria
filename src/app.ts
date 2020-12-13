@@ -1,10 +1,11 @@
 import discord from "discord.js";
+import logger from "./infrastructures/logger";
 import handleMessage from "./message";
 
 export const client = new discord.Client();
 
 client.once("ready", () => {
-    console.log("Discord bot running");
+    logger.log.info("discord bot running");
     client.user?.setPresence({
         status: "online",
         activity: {

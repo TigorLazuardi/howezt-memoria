@@ -6,7 +6,6 @@
         "declarationMap": true,
         "sourceMap": true,
         "outDir": "dist",
-        "rootDir": "src",
         "downlevelIteration": true,
         "strict": true,
         "alwaysStrict": true,
@@ -15,10 +14,14 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "moduleResolution": "node",
-        "baseUrl": "./",
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "baseUrl": "./",
+        "removeComments": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@src/*": ["src/*"]
+        }
     },
     "exclude": ["dist", "test", "src/**/*.test.ts"],
     "include": ["src"],

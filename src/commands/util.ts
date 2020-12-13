@@ -1,3 +1,4 @@
+import RoomMap from "@src/room";
 import { Message } from "discord.js";
 import { PREFIX } from "./prefix";
 
@@ -16,3 +17,23 @@ export function hasCommand(content: string, cmd: string) {
 export async function notImplementedYet(message: Message, cmd: string) {
     await message.channel.send("not implemented yet");
 }
+
+async function doNothing(message: Message, cmd: string) {
+    // Literally told the app to do nothing
+}
+
+export const withRoomRestriction = (cmdFunc: (m: Message, c: string) => Promise<void>) => (
+    message: Message,
+    cmd: string
+) => {
+    const gID = message.guild!.id;
+    if (RoomMap.has(gID)) {
+        const room = RoomMap.get(gID)!;
+        if (message.channel.id === room.channel_id && room.in_room) {
+            return cmdFunc(message, cmd);
+        } else {
+            return doNothing(message, cmd);
+        }
+    }
+    return cmdFunc(message, cmd);
+};

@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import helpCommand from "./help";
-import { hasCommand, notImplementedYet } from "./util";
+import moveCommand from "./move";
+import { hasCommand, notImplementedYet, withRoomRestriction } from "./util";
 
 interface CommandCenter {
     [key: string]: {
@@ -11,24 +12,25 @@ interface CommandCenter {
 
 export const commands: CommandCenter = {
     help: {
-        action: helpCommand,
+        action: withRoomRestriction(helpCommand),
         shortDesc: "Show available commands and explain what they do",
     },
     upload: {
-        action: notImplementedYet,
+        action: withRoomRestriction(notImplementedYet),
         shortDesc: "Upload image to a private server",
     },
     search: {
-        action: notImplementedYet,
+        action: withRoomRestriction(notImplementedYet),
         shortDesc: "Search images according to tags or queries",
     },
     random: {
-        action: notImplementedYet,
+        action: withRoomRestriction(notImplementedYet),
         shortDesc: "Get random images from stored database",
     },
     move: {
-        action: notImplementedYet,
-        shortDesc: "[Global command] Restrict this bot to the channel this command runs.",
+        action: moveCommand,
+        shortDesc:
+            "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
     },
 };
 

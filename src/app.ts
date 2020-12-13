@@ -1,5 +1,5 @@
 import discord from "discord.js";
-import message from "./message";
+import handleMessage from "./message";
 
 export const client = new discord.Client();
 
@@ -15,11 +15,11 @@ export default (token: string) => {
     client.login(token);
 };
 
-message(client);
+handleMessage(client);
 
 client.on("error", console.error);
 
-process.on("SIGINT", async () => {
-    await client.destroy();
+process.on("SIGINT", () => {
+    client.destroy();
     process.exit(0);
 });

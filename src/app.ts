@@ -5,9 +5,11 @@ export const client = new discord.Client();
 
 client.once("ready", () => {
     console.log("Discord bot running");
-    client.user?.setActivity({
-        name: "!hm_help",
-        type: "PLAYING",
+    client.user?.setPresence({
+        status: "online",
+        activity: {
+            name: "Ping this bot for help",
+        },
     });
 });
 

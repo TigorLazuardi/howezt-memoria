@@ -29,10 +29,12 @@ export const withRoomRestriction = (cmdFunc: (m: Message, c: string) => Promise<
     const gID = message.guild!.id;
     if (RoomMap.has(gID)) {
         const room = RoomMap.get(gID)!;
-        if (message.channel.id === room.channel_id && room.in_room) {
-            return cmdFunc(message, cmd);
-        } else {
-            return doNothing(message, cmd);
+        if (room.in_room) {
+            if (message.channel.id === room.channel_id) {
+                return cmdFunc(message, cmd);
+            } else {
+                return doNothing(message, cmd);
+            }
         }
     }
     return cmdFunc(message, cmd);

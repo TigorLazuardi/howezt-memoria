@@ -11,6 +11,7 @@ export default async function helpCommand(message: Message, cmd: string) {
     for (const key in commands) {
         const row = [`${PREFIX}${key}`, "|", commands[key].shortDesc];
         reply.push(row);
+        reply.push(["", "", ""]);
     }
     await message.channel.send(`\`\`\`${textTable(reply)}\`\`\``);
 }

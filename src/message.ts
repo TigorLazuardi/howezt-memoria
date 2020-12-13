@@ -1,6 +1,7 @@
-import { Client } from "discord.js";
+import { Client, Message } from "discord.js";
 import { PREFIX } from "./commands/prefix";
 import commands from "./commands";
+import RoomMap from "./room";
 
 export default function (client: Client) {
     function hasPrefix(str: string) {
@@ -13,14 +14,37 @@ export default function (client: Client) {
     client.on("message", async (message) => {
         if (message.author.bot) return;
         try {
-            if (pingsBotExplicitly(message.content)) {
-                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease, type \`!hm_help\` for help.`);
-            }
-            if (hasPrefix(message.content)) {
-                await commands(message);
+            switch (true) {
+                case pingsBotExplicitly(message.content):
+                    await replyPingBot(message);
+                    return;
+
+                case hasPrefix(message.content):
+                    await commands(message);
+                    return;
             }
         } catch (e) {
             await message.channel.send(e?.message || e || "something happened with the bot");
         }
     });
+}
+
+async function replyPingBot(message: Message) {
+    const gid = message.guild!.id;
+    const r = RoomMap.get(gid);
+    if (r) {
+        if (r.in_room) {
+            if (message.channel.id === r.channel_id) {
+                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease type \`!hm_help\` for more info.`);
+            } else {
+                await message.channel.send(
+                    `Hi <@${message.member?.id}>! I can be called on room <#${r.channel_id}>.\nPlease type \`!hm_help\` over there.`
+                );
+            }
+            return;
+        }
+    }
+    await message.channel.send(
+        `Hi <@${message.member?.id}>!\nI am not placed in any room yet. Please, type \`!hm_help\` for help.`
+    );
 }

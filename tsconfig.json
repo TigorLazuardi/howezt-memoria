@@ -19,6 +19,8 @@
         "baseUrl": "./",
         "removeComments": true,
         "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "assumeChangesOnlyAffectDirectDependencies": true,
         "paths": {
             "@src/*": ["src/*"]
         }

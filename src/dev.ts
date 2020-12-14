@@ -2,7 +2,7 @@ require("dotenv").config();
 
 import app from "./app";
 import { ClientOptions } from "minio";
-import { initialize } from "./infrastructures/minio";
+import minio from "./infrastructures/minio";
 import logger from "./infrastructures/logger";
 import winston, { format } from "winston";
 
@@ -11,7 +11,7 @@ const fmt = format.printf(({ level, message, timestamp }) => {
     return msg;
 });
 
-logger.log = winston.createLogger({
+logger.initialize({
     format: format.combine(
         format.timestamp({
             format: new Date().toLocaleString(),
@@ -30,7 +30,7 @@ const minioOptions: ClientOptions = {
     secretKey: process.env.MINIO_SECRET_KEY!,
 };
 
-initialize(minioOptions);
+minio.initialize(minioOptions);
 
 app(token);
 

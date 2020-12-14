@@ -1,11 +1,20 @@
 import { Client, ClientOptions } from "minio";
 import logger from "./logger";
 
-let minioClient: Client;
+class Minio {
+    private _client: Client | undefined;
 
-export function initialize(opt: ClientOptions) {
-    minioClient = new Client(opt);
-    logger.log.info("connected to minio");
+    get client() {
+        if (!this._client) {
+            throw new Error("Minio client is not initialized");
+        }
+        return this._client;
+    }
+
+    initialize(opt: ClientOptions) {
+        this._client = new Client(opt);
+        logger.log.info("connected to minio");
+    }
 }
 
-export default () => minioClient;
+export default new Minio();

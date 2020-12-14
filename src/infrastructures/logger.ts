@@ -13,8 +13,8 @@ class Logger {
         return this._log;
     }
 
-    set log(v: winston.Logger) {
-        this._log = v;
+    initialize(opts: winston.LoggerOptions) {
+        this._log = winston.createLogger(opts);
     }
 }
 

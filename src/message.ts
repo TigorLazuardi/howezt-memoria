@@ -2,6 +2,7 @@ import { Client, Message } from "discord.js";
 import { PREFIX } from "./commands/prefix";
 import commands from "./commands";
 import RoomMap from "./room";
+import withRecovery from "./recovery";
 
 export default function (client: Client) {
     function hasPrefix(str: string) {
@@ -11,21 +12,23 @@ export default function (client: Client) {
     function pingsBotExplicitly(str: string) {
         return str.trim().startsWith(`<@!${client.user?.id}>`);
     }
-    client.on("message", async (message) => {
-        if (message.author.bot) return;
-        try {
-            switch (true) {
-                case pingsBotExplicitly(message.content):
-                    await replyPingBot(message);
-                    return;
+    client.on("message", (message) => {
+        withRecovery(async () => {
+            if (message.author.bot) return;
+            try {
+                switch (true) {
+                    case pingsBotExplicitly(message.content):
+                        await replyPingBot(message);
+                        return;
 
-                case hasPrefix(message.content):
-                    await commands(message);
-                    return;
+                    case hasPrefix(message.content):
+                        await commands(message);
+                        return;
+                }
+            } catch (e) {
+                await message.channel.send(e?.message || e || "something happened with the bot");
             }
-        } catch (e) {
-            await message.channel.send(e?.message || e || "something happened with the bot");
-        }
+        });
     });
 }
 

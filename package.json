@@ -9,7 +9,7 @@
         "clean": "rimraf dist",
         "dev": "NODE_ENV=development npm run concurrent",
         "watch-build": "tsc --watch",
-        "watch-run": "nodemon --ext 'js' dist/index.js",
+        "watch-run": "nodemon --watch dist dist/index.js",
         "concurrent": "npm run build && concurrently \"npm:watch-*\"",
         "dev_windows": "set NODE_ENV=development && npm run concurrent",
         "start": "npm run clean && npm run build && node dist/index.js"

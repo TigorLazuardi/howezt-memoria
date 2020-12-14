@@ -1,3 +1,4 @@
+import logger from "@src/infrastructures/logger";
 import RoomMap from "@src/room";
 import { Message } from "discord.js";
 import { PREFIX } from "./prefix";
@@ -38,4 +39,12 @@ export const withRoomRestriction = (cmdFunc: (m: Message, c: string) => Promise<
         }
     }
     return cmdFunc(message, cmd);
+};
+
+export const withLog = (cmdFunc: (m: Message, c: string) => Promise<void>, msg: string) => async (
+    message: Message,
+    cmd: string
+) => {
+    await cmdFunc(message, cmd);
+    logger.log.info(`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`);
 };

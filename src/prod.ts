@@ -1,5 +1,5 @@
 import app from "./app";
-import elasticApmNode from "elastic-apm-node";
+import minio from "./infrastructures/minio";
 import vault from "./infrastructures/vault";
 
 interface HoweztMemoriaConfig {
@@ -11,15 +11,22 @@ interface HoweztMemoriaConfig {
         secret_token?: string;
         server_url: string;
     };
+    minio: {
+        host: string;
+        port: number;
+        access_key: string;
+        secret_key: string;
+    };
 }
 
 vault.read("kv/howezt-memoria").then((data: HoweztMemoriaConfig) => {
-    elasticApmNode.start({
-        serverUrl: data.apm.server_url,
-        serviceName: data.apm.service_name,
-        secretToken: data.apm.secret_token,
-    });
     app(data.bot.token);
+    minio.initialize({
+        endPoint: data.minio.host,
+        accessKey: data.minio.access_key,
+        port: data.minio.port,
+        secretKey: data.minio.access_key,
+    });
 });
 
 export default {};

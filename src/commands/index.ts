@@ -1,7 +1,8 @@
 import { Message } from "discord.js";
 import helpCommand from "./help";
+import { currentLogCommand, commandLogs as logsCommand } from "./logs";
 import moveCommand, { exitChannelCommand } from "./move";
-import { hasCommand, notImplementedYet, withRoomRestriction } from "./util";
+import { hasCommand, notImplementedYet, withLog, withRoomRestriction } from "./util";
 
 interface CommandCenter {
     [key: string]: {
@@ -33,9 +34,17 @@ export const commands: CommandCenter = {
             "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
     },
     exit_channel: {
-        action: withRoomRestriction(exitChannelCommand),
+        action: withRoomRestriction(withLog(exitChannelCommand, "told the bot to exit room")),
         shortDesc:
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
+    },
+    logs: {
+        action: withRoomRestriction(logsCommand),
+        shortDesc: "Get list of logs. give log filename to fetch the content",
+    },
+    current_log: {
+        action: withRoomRestriction(withLog(currentLogCommand, "asked for current log")),
+        shortDesc: "Get latest logs",
     },
 };
 

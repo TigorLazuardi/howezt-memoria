@@ -3,23 +3,6 @@ require("dotenv").config();
 import app from "./app";
 import { ClientOptions } from "minio";
 import minio from "./infrastructures/minio";
-import logger from "./infrastructures/logger";
-import winston, { format } from "winston";
-
-const fmt = format.printf(({ level, message, timestamp }) => {
-    let msg = `${timestamp} [${level}] ${message} `;
-    return msg;
-});
-
-logger.initialize({
-    format: format.combine(
-        format.timestamp({
-            format: new Date().toLocaleString(),
-        }),
-        fmt
-    ),
-    transports: [new winston.transports.Console()],
-});
 
 const token = process.env.BOT_TOKEN || "";
 

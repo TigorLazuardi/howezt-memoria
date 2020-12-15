@@ -25,15 +25,10 @@ client.on("error", logger.log.error);
 const exit = () => {
     logger.log.info("app exited");
     client.destroy();
-    logger.log.error("exit status 0");
-    process.exit(0);
+    logger.log.error("exit status 0", () => {
+        process.exit(0);
+    });
 };
 
 process.on("SIGINT", exit);
 process.on("SIGHUP", exit);
-process.on("uncaughtException", (err) => {
-    logger.log.error(err.message);
-    client.destroy();
-    logger.log.error("exit status 1");
-    process.exit(1);
-});

@@ -1,14 +1,15 @@
-import { Message } from "discord.js";
-import helpCommand from "./help";
-import { currentLogCommand, commandLogs as logsCommand } from "./logs";
-import moveCommand, { exitChannelCommand } from "./move";
-import { hasCommand, notImplementedYet, withLog, withRoomRestriction } from "./util";
+import { Message } from "discord.js"
+import helpCommand from "./help"
+import { currentLogCommand, commandLogs as logsCommand } from "./logs"
+import moveCommand, { exitChannelCommand } from "./move"
+import uploadCommand from "./upload"
+import { hasCommand, notImplementedYet, withLog, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
-        action: (message: Message, command: string) => Promise<void>;
-        shortDesc: string;
-    };
+        action: (message: Message, command: string) => Promise<void>
+        shortDesc: string
+    }
 }
 
 export const commands: CommandCenter = {
@@ -17,7 +18,7 @@ export const commands: CommandCenter = {
         shortDesc: "Show available commands and explain what they do",
     },
     upload: {
-        action: withRoomRestriction(notImplementedYet),
+        action: withRoomRestriction(uploadCommand),
         shortDesc: "Upload image to a private server",
     },
     search: {
@@ -46,16 +47,16 @@ export const commands: CommandCenter = {
         action: withRoomRestriction(withLog(currentLogCommand, "asked for current log")),
         shortDesc: "Get latest logs",
     },
-};
+}
 
-export default async function (message: Message) {
-    const trimmed = message.content.trim();
+export default async function handleCommand(message: Message) {
+    const trimmed = message.content.trim()
     for (const key in commands) {
-        const cmd = hasCommand(trimmed, key);
+        const cmd = hasCommand(trimmed, key)
         if (!!cmd) {
-            commands[key].action(message, cmd);
-            return;
+            commands[key].action(message, cmd)
+            return
         }
     }
-    await message.channel.send("Uknown command. type `!hm_help` for more info");
+    await message.channel.send("Unknown command. type `!hm_help` for more info")
 }

@@ -9,7 +9,7 @@
         "clean": "rimraf dist",
         "dev": "NODE_ENV=development npm run concurrent",
         "watch-build": "tsc --watch",
-        "watch-run": "nodemon --watch dist dist/index.js",
+        "watch-run": "nodemon --signal SIGINT --watch dist dist/index.js",
         "concurrent": "npm run build && concurrently \"npm:watch-*\"",
         "dev_windows": "set NODE_ENV=development && npm run concurrent",
         "start": "npm run clean && npm run build && node dist/index.js"
@@ -20,8 +20,10 @@
     "dependencies": {
         "@types/fs-extra": "^9.0.5",
         "@types/minio": "^7.0.6",
+        "@types/mongodb": "^3.6.3",
         "@types/node": "^14.14.12",
         "@types/text-table": "^0.2.1",
+        "@types/yargs-parser": "^15.0.0",
         "discord.js": "^12.2.0",
         "fs-extra": "^9.0.1",
         "minio": "^7.0.17",
@@ -31,7 +33,8 @@
         "text-table": "^0.2.0",
         "typescript": "^4.1.2",
         "winston": "^3.3.3",
-        "winston-daily-rotate-file": "^4.5.0"
+        "winston-daily-rotate-file": "^4.5.0",
+        "yargs-parser": "^20.2.4"
     },
     "devDependencies": {
         "concurrently": "^5.3.0",
@@ -40,6 +43,8 @@
         "rimraf": "^3.0.2"
     },
     "_moduleAliases": {
-        "@src": "dist"
+        "@src": "dist",
+        "@infrastructures": "dist/infrastructures",
+        "@commands": "dist/commands"
     }
 }

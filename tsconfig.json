@@ -9,7 +9,7 @@
         "downlevelIteration": true,
         "strict": true,
         "alwaysStrict": true,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "noUnusedParameters": false,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
@@ -22,7 +22,9 @@
         "incremental": true,
         "assumeChangesOnlyAffectDirectDependencies": true,
         "paths": {
-            "@src/*": ["src/*"]
+            "@src/*": ["src/*"],
+            "@commands/*": ["src/commands/*"],
+            "@infrastructures/*": ["src/infrastructures/*"]
         }
     },
     "exclude": ["dist", "test", "src/**/*.test.ts"],

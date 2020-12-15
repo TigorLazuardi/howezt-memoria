@@ -1,15 +1,15 @@
-import winston, { format } from "winston";
-import "winston-daily-rotate-file";
+import winston, { format } from "winston"
+import "winston-daily-rotate-file"
 
 class Logger {
-    private _log: winston.Logger | undefined;
+    private _log?: winston.Logger
 
     get log() {
         if (!this._log) {
-            const fmt = format.printf(({ level, message, timestamp }) => {
-                let msg = `${timestamp} [${level}] ${message} `;
-                return msg;
-            });
+            const fmt = format.printf(
+                ({ level, message, timestamp }) =>
+                    `${timestamp} [${level}] ${message}`
+            )
             this._log = winston.createLogger({
                 format: format.combine(
                     format.timestamp({
@@ -26,14 +26,14 @@ class Logger {
                         createSymlink: true,
                     }),
                 ],
-            });
+            })
         }
-        return this._log;
+        return this._log
     }
 
     initialize(opts: winston.LoggerOptions) {
-        this._log = winston.createLogger(opts);
+        this._log = winston.createLogger(opts)
     }
 }
 
-export default new Logger();
+export default new Logger()

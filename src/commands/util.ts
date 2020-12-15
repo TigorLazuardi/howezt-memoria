@@ -70,7 +70,7 @@ export function split(message: Message) {
  * Returns TRUE if the first specified array contains all elements
  * from the second one. FALSE otherwise.
  */
-export function arrayContainsArray(superset: any[], subset: any[]): boolean {
+export function arrayContainsArray(superset: ReadonlyArray<any>, subset: ReadonlyArray<any>): boolean {
     if (!subset.length) {
         return false
     }
@@ -80,7 +80,7 @@ export function arrayContainsArray(superset: any[], subset: any[]): boolean {
 /**
  * check if object passed only has string or number of values
  */
-export function checkIfMapStringStringOrNumber(obj: { [key: string]: any }): boolean {
+export function checkIfMapStringStringOrNumber(obj: { readonly [key: string]: any }): boolean {
     for (const key in obj) {
         if (key === "_") continue
         switch (typeof obj[key]) {

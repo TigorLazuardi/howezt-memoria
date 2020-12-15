@@ -1,9 +1,10 @@
+import logger from "@src/infrastructures/logger"
 import { Message } from "discord.js"
 import helpCommand from "./help"
 import { currentLogCommand, commandLogs as logsCommand } from "./logs"
 import moveCommand, { exitChannelCommand } from "./move"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, withLog, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, split, withLog, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
@@ -14,11 +15,11 @@ interface CommandCenter {
 
 export const commands: CommandCenter = {
     help: {
-        action: withRoomRestriction(helpCommand),
+        action: withRoomRestriction(withLog(helpCommand, "asked for help command")),
         shortDesc: "Show available commands and explain what they do",
     },
     upload: {
-        action: withRoomRestriction(uploadCommand),
+        action: withRoomRestriction(withLog(uploadCommand, "uses !hm_upload command")),
         shortDesc: "Upload image to a private server",
     },
     search: {
@@ -30,7 +31,7 @@ export const commands: CommandCenter = {
         shortDesc: "Get random images from stored database",
     },
     move: {
-        action: moveCommand,
+        action: withLog(moveCommand, "told the bot to move"),
         shortDesc:
             "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
     },
@@ -40,7 +41,7 @@ export const commands: CommandCenter = {
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
     },
     logs: {
-        action: withRoomRestriction(logsCommand),
+        action: withRoomRestriction(withLog(logsCommand, "asked for log")),
         shortDesc: "Get list of logs. give log filename to fetch the content",
     },
     current_log: {
@@ -59,4 +60,8 @@ export default async function handleCommand(message: Message) {
         }
     }
     await message.channel.send("Unknown command. type `!hm_help` for more info")
+    const [cmd] = split(message)
+    logger.log.info(
+        `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`
+    )
 }

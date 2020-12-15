@@ -6,10 +6,7 @@ class Logger {
 
     get log() {
         if (!this._log) {
-            const fmt = format.printf(
-                ({ level, message, timestamp }) =>
-                    `${timestamp} [${level}] ${message}`
-            )
+            const fmt = format.printf(({ level, message, timestamp }) => `${timestamp} [${level}] ${message}`)
             this._log = winston.createLogger({
                 format: format.combine(
                     format.timestamp({
@@ -22,7 +19,8 @@ class Logger {
                     new winston.transports.DailyRotateFile({
                         filename: "logs/%DATE%.log",
                         datePattern: "YYYY-MM-DD",
-                        maxFiles: "14d",
+                        maxFiles: 128,
+                        maxSize: "2m",
                         createSymlink: true,
                     }),
                 ],

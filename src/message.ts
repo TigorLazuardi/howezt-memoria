@@ -1,55 +1,61 @@
-import { Client, Message } from "discord.js";
-import { PREFIX } from "./commands/prefix";
-import commands from "./commands";
-import RoomMap from "./room";
-import withRecovery from "./recovery";
-import logger from "./infrastructures/logger";
+import { Client, Message } from "discord.js"
+import { PREFIX } from "./commands/prefix"
+import commands from "./commands"
+import RoomMap from "./room"
+import withRecovery from "./recovery"
+import logger from "./infrastructures/logger"
 
 export default function (client: Client) {
     function hasPrefix(str: string) {
-        return !!str.trim().startsWith(PREFIX);
+        return !!str.trim().startsWith(PREFIX)
     }
 
     function pingsBotExplicitly(str: string) {
-        return str.trim().startsWith(`<@!${client.user?.id}>`);
+        return str.trim().startsWith(`<@!${client.user?.id}>`)
     }
     client.on("message", (message) => {
         withRecovery(async () => {
-            if (message.author.bot) return;
+            if (message.author.bot) return
             try {
                 switch (true) {
                     case pingsBotExplicitly(message.content):
-                        await replyPingBot(message);
-                        return;
+                        await replyPingBot(message)
+                        return
 
                     case hasPrefix(message.content):
-                        await commands(message);
-                        return;
+                        await commands(message)
+                        return
                 }
             } catch (e) {
-                await message.channel.send(e?.message || e || "something happened with the bot");
-                logger.log.error(e?.message || (e as string) || "something happened with the bot");
+                await message.channel.send(e?.message || e || "something happened with the bot")
+                logger.log.error(e?.message || (e as string) || "something happened with the bot")
             }
-        });
-    });
+        })
+    })
 }
 
 async function replyPingBot(message: Message) {
-    const gid = message.guild!.id;
-    const r = RoomMap.get(gid);
+    const gid = message.guild!.id
+    const r = RoomMap.get(gid)
     if (r) {
         if (r.in_room) {
             if (message.channel.id === r.channel_id) {
-                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease type \`!hm_help\` for more info.`);
+                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease type \`!hm_help\` for more info.`)
             } else {
                 await message.channel.send(
                     `Hi <@${message.member?.id}>! I can be called on room <#${r.channel_id}>.\nPlease type \`!hm_help\` over there.`
-                );
+                )
             }
-            return;
+            logger.log.info(
+                `${message.author.username}/${message.member?.nickname} (${message.author.id}) pings the bot when the bot is in room ${r.channel_id}`
+            )
+            return
         }
     }
     await message.channel.send(
         `Hi <@${message.member?.id}>!\nI am not placed in any room yet. Please, type \`!hm_help\` for help.`
-    );
+    )
+    logger.log.info(
+        `${message.author.username}/${message.member?.nickname} (${message.author.id}) pings the bot when bot is not in any channel`
+    )
 }

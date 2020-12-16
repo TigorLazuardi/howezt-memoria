@@ -3,7 +3,7 @@ import { PREFIX } from "./commands/prefix"
 import commands from "./commands"
 import RoomMap from "./room"
 import withRecovery from "./recovery"
-import logger from "./infrastructures/logger"
+import logger from "@infra/logger"
 
 export default function (client: Client) {
     function hasPrefix(str: string) {

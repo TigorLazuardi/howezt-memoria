@@ -24,7 +24,7 @@
         "paths": {
             "@src/*": ["src/*"],
             "@commands/*": ["src/commands/*"],
-            "@infrastructures/*": ["src/infrastructures/*"]
+            "@infra/*": ["src/infrastructures/*"]
         }
     },
     "exclude": ["dist", "test", "src/**/*.test.ts"],

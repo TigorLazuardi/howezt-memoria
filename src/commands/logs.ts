@@ -1,4 +1,4 @@
-import logger from "@infrastructures/logger"
+import logger from "@infra/logger"
 import { Message } from "discord.js"
 import FsExtra from "fs-extra"
 import readline from "readline"

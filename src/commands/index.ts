@@ -1,4 +1,4 @@
-import logger from "@src/infrastructures/logger"
+import logger from "@infra/logger"
 import { Message } from "discord.js"
 import helpCommand from "./help"
 import { currentLogCommand, commandLogs as logsCommand } from "./logs"

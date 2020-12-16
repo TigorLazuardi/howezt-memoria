@@ -44,7 +44,7 @@
     },
     "_moduleAliases": {
         "@src": "dist",
-        "@infrastructures": "dist/infrastructures",
+        "@infra": "dist/infrastructures",
         "@commands": "dist/commands"
     }
 }

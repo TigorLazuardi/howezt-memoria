@@ -1,4 +1,4 @@
-import logger from "@src/infrastructures/logger"
+import logger from "@infra/logger"
 import RoomMap from "@src/room"
 import { Message } from "discord.js"
 import { PREFIX } from "./prefix"

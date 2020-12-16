@@ -2,9 +2,9 @@ require("dotenv").config()
 
 import startApp from "./app"
 import { ClientOptions } from "minio"
-import minio from "./infrastructures/minio"
-import mongo from "./infrastructures/mongodb"
-import logger from "./infrastructures/logger"
+import minio from "@infra/minio"
+import mongo from "@infra/mongodb"
+import logger from "@infra/logger"
 
 const token = process.env.BOT_TOKEN || ""
 

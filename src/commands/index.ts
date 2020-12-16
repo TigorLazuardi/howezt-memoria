@@ -41,7 +41,7 @@ export const commands: CommandCenter = {
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
     },
     logs: {
-        action: withRoomRestriction(withLog(logsCommand, "asked for log")),
+        action: withRoomRestriction(logsCommand),
         shortDesc: "Get list of logs. give log filename to fetch the content",
     },
     current_log: {

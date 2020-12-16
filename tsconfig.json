@@ -22,9 +22,10 @@
         "incremental": true,
         "assumeChangesOnlyAffectDirectDependencies": true,
         "paths": {
-            "@src/*": ["src/*"],
             "@commands/*": ["src/commands/*"],
-            "@infra/*": ["src/infrastructures/*"]
+            "@infra/*": ["src/infrastructures/*"],
+            "@repo/*": ["src/repositories/*"],
+            "@src/*": ["src/*"]
         }
     },
     "exclude": ["dist", "test", "src/**/*.test.ts"],

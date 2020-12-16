@@ -19,8 +19,7 @@ class Logger {
                     new winston.transports.DailyRotateFile({
                         filename: "logs/%DATE%.log",
                         datePattern: "YYYY-MM-DD",
-                        maxFiles: 128,
-                        maxSize: "2m",
+                        maxFiles: "14d",
                         createSymlink: true,
                     }),
                 ],

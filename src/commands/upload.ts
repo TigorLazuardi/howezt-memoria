@@ -8,8 +8,6 @@ interface FieldTags {
     [key: string]: any
 }
 
-export const HOWEZT = "howezt"
-
 const description = `!hm_upload uploads an image to private server.
 
 upload requires arguments to be passed (written in the text box).

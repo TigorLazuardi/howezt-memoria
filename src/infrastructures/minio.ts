@@ -2,6 +2,8 @@ import { Client, ClientOptions } from "minio"
 
 class Minio {
     private _client: Client | undefined
+    host = "http://localhost"
+    port = "9000"
 
     get client() {
         if (!this._client) {
@@ -12,6 +14,8 @@ class Minio {
 
     initialize(opt: ClientOptions) {
         this._client = new Client(opt)
+        this.host = `http://${opt.endPoint}`
+        this.port = opt.port?.toString() || "9000"
     }
 }
 

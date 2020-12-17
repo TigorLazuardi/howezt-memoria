@@ -22,19 +22,24 @@ export interface SearchQuery {
  * @param filename the name for the entry for primary searching index
  * @param metadata the metadata for the entry. Used for help searching index
  */
-export async function addEntry(
+export async function upsertEntry(
     link: string,
     filename: string,
     folder = "",
     metadata?: { [key: string]: any }
 ): Promise<void> {
-    await mongo.db.insertOne({
-        link,
-        name: metadata?.name || filename,
-        folder,
-        filename,
-        metadata,
-    })
+    await mongo.db.updateOne(
+        { filename },
+        {
+            link,
+            name: metadata?.name || filename,
+            folder,
+            metadata,
+        },
+        {
+            upsert: true,
+        }
+    )
 }
 
 export async function deleteEntry(_id: string | number): Promise<void> {
@@ -108,9 +113,18 @@ export async function search({ _id, query, limit = 5, ...rest }: SearchQuery) {
 }
 
 export async function index() {
-    await mongo.db.createIndex([
-        ["name", "text"],
-        ["filename", "text"],
-        ["folder", 1],
-    ])
+    await mongo.db.createIndex(
+        [
+            ["name", "text"],
+            ["filename", "text"],
+            ["folder", 1],
+        ],
+        { name: "search index" }
+    )
+    await mongo.db.createIndex(
+        {
+            filename: 1,
+        },
+        { name: "unique filename", unique: true }
+    )
 }

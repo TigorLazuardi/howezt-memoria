@@ -3,7 +3,7 @@ import { arrayContainsArray, checkIfMapStringStringOrNumber, sendWithLog, split,
 import yargsParser from "yargs-parser"
 import { upload } from "@repo/minio"
 import { Readable } from "stream"
-import { addEntry } from "@repo/mongodb"
+import { upsertEntry } from "@repo/mongodb"
 import textTable from "text-table"
 
 interface FieldTags {
@@ -103,17 +103,25 @@ export default async function uploadCommand(message: Message, cmd: string) {
     const fieldTags: FieldTags = { ...args }
     delete fieldTags._
     try {
-        if (typeof args.folder === "string" && args.folder.endsWith("/")) {
-            const f = args.folder.substring(0, args.folder.length - 1)
+        if (typeof args.folder === "string") {
+            let f: string = args.folder
+            if (f.endsWith("/")) f = f.substring(0, args.folder.length - 1)
+            if (f.startsWith("/")) f = f.substring(1)
             args.folder = f
             filename = [f, filename].join("/")
         }
         const link = await upload(filename, file!.attachment as Readable)
-        await addEntry(link, filename, args.folder, args)
-        const replyMeta = textTable([
+        await upsertEntry(link, filename, args.folder, args)
+        const t: (string | number)[][] = [
             ["filename", ":", filename],
             ["link", ":", link],
-        ])
+        ]
+        for (const key in fieldTags) {
+            if (key === "name" || key === "folder") continue
+            t.push([key, ":", fieldTags[key]])
+        }
+
+        const replyMeta = textTable(t)
         await message.channel.send(`success upload.\`\`\`\n${replyMeta}\`\`\``)
         userLog(message, `success upload`, "info", { filename, link })
     } catch (e) {

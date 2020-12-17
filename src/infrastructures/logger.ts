@@ -6,7 +6,13 @@ class Logger {
 
     get log() {
         if (!this._log) {
-            const fmt = format.printf(({ level, message, timestamp }) => `${timestamp} [${level}] ${message}`)
+            const fmt = format.printf(({ level, message, timestamp, ...rest }) => {
+                let result = `${timestamp} [${level}] ${message}`
+                if (Object.keys(rest).length) {
+                    result += ` ${JSON.stringify(rest)}`
+                }
+                return result
+            })
             this._log = winston.createLogger({
                 format: format.combine(
                     format.timestamp({

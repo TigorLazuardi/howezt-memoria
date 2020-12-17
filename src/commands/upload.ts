@@ -1,6 +1,10 @@
 import { Message } from "discord.js"
-import { arrayContainsArray, checkIfMapStringStringOrNumber, split } from "./util"
+import { arrayContainsArray, checkIfMapStringStringOrNumber, sendWithLog, split, userLog } from "./util"
 import yargsParser from "yargs-parser"
+import { upload } from "@repo/minio"
+import { Readable } from "stream"
+import { addEntry } from "@repo/mongodb"
+import textTable from "text-table"
 
 interface FieldTags {
     name?: string
@@ -52,6 +56,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
         await message.channel.send(
             "Bad argument(s) on parsing. Only text or number should be value of argument. Please use `!hm_upload` without any arguments for more info"
         )
+        userLog(message, "bad arguments: keys have unsupported types", "error", args)
         return
     }
     const [__, ...fields] = Object.keys(args)
@@ -60,20 +65,23 @@ export default async function uploadCommand(message: Message, cmd: string) {
         await message.channel.send(
             `Failed to parse the argument in the message. Please use \`!hm_upload\` without any arguments for more info`
         )
+        userLog(message, "bad arguments: no keys at all", "error", args)
         return
     }
 
     // When the user has arguments but does not upload any files
     if (!message.attachments.size) {
         await message.channel.send(`Please upload an image`)
+        userLog(message, "no images set")
         return
     }
 
     const requiredFields = ["name"]
     if (!arrayContainsArray(fields, requiredFields)) {
         await message.channel.send(
-            `\`--name\` key are required. Please use \`!hm_upload\` without any arguments for more info`
+            `\`--name\` key is required. Please use \`!hm_upload\` without any arguments for more info`
         )
+        userLog(message, "user does not set --name key", "error")
         return
     }
 
@@ -84,11 +92,34 @@ export default async function uploadCommand(message: Message, cmd: string) {
             !!att.name?.toLowerCase().endsWith(".jpeg")
     )
 
-    if (isAllImages) {
-        await message.channel.send(`Please only upload images. Supported images are PNG and JPEG`)
+    const file = message.attachments.first()
+    let filename = file!.name!
+
+    if (!isAllImages) {
+        await message.channel.send(`Please only an image. Supported image is PNG and JPEG`)
+        userLog(message, "fails to upload because file is not png or jpeg", "error", { filename })
         return
     }
     const fieldTags: FieldTags = { ...args }
     delete fieldTags._
-    await message.channel.send(`Acknowledged`)
+    try {
+        if (typeof args.folder === "string" && args.folder.endsWith("/")) {
+            const f = args.folder.substring(0, args.folder.length - 1)
+            args.folder = f
+            filename = [f, filename].join("/")
+        }
+        const link = await upload(filename, file!.attachment as Readable)
+        await addEntry(link, filename, args.folder, args)
+        const replyMeta = textTable([
+            ["filename", ":", filename],
+            ["link", ":", link],
+        ])
+        await message.channel.send(`success upload.\`\`\`\n${replyMeta}\`\`\``)
+        userLog(message, `success upload`, "info", { filename, link })
+    } catch (e) {
+        await message.channel.send(
+            `fail to upload image, reason: \`\`\`\n${e?.message || e || "unknown failure"}\`\`\``
+        )
+        userLog(message, `fail to upload image`, "error", { reason: e?.message || e || "unknown failure" })
+    }
 }

@@ -1,5 +1,4 @@
 import { MongoClient, MongoClientOptions } from "mongodb"
-import logger from "./logger"
 
 export interface ImageCollection {
     name: string
@@ -12,33 +11,27 @@ export interface ImageCollection {
 class Mongo {
     private _client?: MongoClient
     get client() {
-        if (!this._client) {
-            this._client = this.initDefault()
-        }
-        return this._client
+        return this._client!
     }
 
-    initialize(uri?: string, opts?: MongoClientOptions) {
+    async initialize(uri?: string, opts?: MongoClientOptions) {
         if (!uri) {
-            this.initDefault()
+            await this.initDefault()
             return
         }
-        this._client = new MongoClient(uri, opts)
+        this._client = await new MongoClient(uri, opts).connect()
     }
 
-    private initDefault() {
-        this._client = new MongoClient(process.env.MONGODB_URI!, {
+    private async initDefault() {
+        this._client = await new MongoClient(process.env.MONGODB_URI!, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-        })
+        }).connect()
         return this._client
     }
 
     get db() {
-        if (!this._client) {
-            this._client = this.initDefault()
-        }
-        return this._client.db("howezt").collection<ImageCollection>("files")
+        return this._client!.db("howezt").collection<ImageCollection>("files")
     }
 }
 

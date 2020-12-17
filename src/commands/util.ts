@@ -94,3 +94,22 @@ export function checkIfMapStringStringOrNumber(obj: { readonly [key: string]: an
     }
     return true
 }
+
+export function userLog(
+    message: Message,
+    msg: string,
+    type: "info" | "error" | "warn" | "emerg" | "debug" = "info",
+    data?: { [key: string]: any }
+) {
+    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, data)
+}
+
+export async function sendWithLog(
+    message: Message,
+    msg: string,
+    type: "info" | "error" | "warn" | "emerg" | "debug" = "info",
+    data?: { [key: string]: any }
+) {
+    await message.channel.send(msg)
+    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, data)
+}

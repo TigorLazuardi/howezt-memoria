@@ -18,8 +18,18 @@ const minioOptions: ClientOptions = {
 minio.initialize(minioOptions)
 logger.log.info(`connected to minio`)
 
-mongo.initialize()
-logger.log.info(`connected to mongodb`)
+mongo
+    .initialize()
+    .then(() => {
+        logger.log.info(`connected to mongodb`)
+        return mongo.db.createIndex({
+            name: "text",
+            filename: "text",
+            folder: 1,
+        })
+    })
+    .then(() => logger.log.info(`indexes configured`))
+    .catch(logger.log.error)
 
 startApp(token)
 

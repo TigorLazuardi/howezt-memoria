@@ -19,7 +19,7 @@ export const commands: CommandCenter = {
         shortDesc: "Show available commands and explain what they do",
     },
     upload: {
-        action: withRoomRestriction(withLog(uploadCommand, "uses !hm_upload command")),
+        action: withRoomRestriction(uploadCommand),
         shortDesc: "Upload image to a private server",
     },
     search: {

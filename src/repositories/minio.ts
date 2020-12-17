@@ -15,6 +15,15 @@ export function upload(filename: string, file: Readable | Buffer | string): Prom
     })
 }
 
+export function deleteFile(filename: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        minio.client.removeObject(HOWEZT, filename, (err) => {
+            if (err) return reject(err)
+            resolve()
+        })
+    })
+}
+
 /**
  * @returns the readable file from object
  * @throws when file with filename not is found

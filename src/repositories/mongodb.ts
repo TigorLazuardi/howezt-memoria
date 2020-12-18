@@ -1,6 +1,5 @@
-import mongo from "@infra/mongodb"
+import mongo, { ImageCollection } from "@infra/mongodb"
 import { MongoError, ObjectID } from "mongodb"
-import { ImageCollection } from "@infra/mongodb"
 
 export interface SearchQuery {
     /**
@@ -27,22 +26,29 @@ export async function upsertEntry(
     filename: string,
     folder = "",
     metadata?: { [key: string]: any }
-): Promise<void> {
-    await mongo.db.updateOne(
+): Promise<string> {
+    const result = await mongo.db.updateOne(
         { filename },
         {
-            link,
-            name: metadata?.name || filename,
-            folder,
-            metadata,
+            $set: {
+                link,
+                name: metadata?.name || filename,
+                folder,
+                metadata,
+            },
         },
         {
             upsert: true,
         }
     )
+    return result.upsertedId._id.toHexString()
 }
 
-export async function deleteEntry(_id: string | number): Promise<void> {
+export async function deleteEntryByFilename(filename: string): Promise<void> {
+    await mongo.db.deleteOne({ filename })
+}
+
+export async function deleteEntryByID(_id: string | number): Promise<void> {
     await mongo.db.deleteOne({ _id: new ObjectID(_id) })
 }
 
@@ -117,7 +123,6 @@ export async function index() {
         [
             ["name", "text"],
             ["filename", "text"],
-            ["folder", 1],
         ],
         { name: "search index" }
     )
@@ -126,5 +131,11 @@ export async function index() {
             filename: 1,
         },
         { name: "unique filename", unique: true }
+    )
+    await mongo.db.createIndex(
+        {
+            folder: 1,
+        },
+        { name: "folder index" }
     )
 }

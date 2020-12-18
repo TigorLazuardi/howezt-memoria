@@ -1,11 +1,11 @@
 require("dotenv").config()
 
-import startApp from "./app"
-import { ClientOptions } from "minio"
+import logger from "@infra/logger"
 import minio from "@infra/minio"
 import mongo from "@infra/mongodb"
-import logger from "@infra/logger"
 import { index } from "@repo/mongodb"
+import { ClientOptions } from "minio"
+import startApp from "./app"
 
 const token = process.env.BOT_TOKEN || ""
 
@@ -22,12 +22,16 @@ logger.log.info(`connected to minio`)
 
 mongo
     .initialize()
+    .catch((err) => {
+        logger.log.emerg(err)
+        process.exit(1)
+    })
     .then(() => {
         logger.log.info(`connected to mongodb`)
         return index()
     })
-    .then(() => logger.log.info(`indexes configured`))
     .catch(logger.log.error)
+    .then(() => logger.log.info(`indexes configured`))
 
 startApp(token)
 

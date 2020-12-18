@@ -113,3 +113,15 @@ export async function sendWithLog(
     await message.channel.send(msg)
     logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, data)
 }
+
+/**
+ * Change non url friendly chars to underscores and trim trailing or starting underscores
+ */
+export function urlifyText(text: string | number) {
+    return text
+        .toString()
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .replace(/^_+|_+$/, "")
+}
+
+export async function rollback(filename: string) {}

@@ -1,10 +1,10 @@
-import { Message } from "discord.js"
-import { arrayContainsArray, checkIfMapStringStringOrNumber, sendWithLog, split, userLog } from "./util"
-import yargsParser from "yargs-parser"
 import { upload } from "@repo/minio"
-import { Readable } from "stream"
 import { upsertEntry } from "@repo/mongodb"
+import { Message } from "discord.js"
+import { Readable } from "stream"
 import textTable from "text-table"
+import yargsParser from "yargs-parser"
+import { arrayContainsArray, checkIfMapStringStringOrNumber, split, urlifyText, userLog } from "./util"
 
 interface FieldTags {
     name?: string
@@ -94,24 +94,40 @@ export default async function uploadCommand(message: Message, cmd: string) {
 
     const file = message.attachments.first()
     let filename = file!.name!
+    const [exName, ext] = [filename.split(".").shift()!, filename.split(".").pop()!]
+
+    if (typeof args.filename === "string" || typeof args.filename === "number") {
+        filename = [urlifyText(args.filename), ext].join(".")
+        delete args.filename
+    }
 
     if (!isAllImages) {
         await message.channel.send(`Please only an image. Supported image is PNG and JPEG`)
         userLog(message, "fails to upload because file is not png or jpeg", "error", { filename })
         return
     }
+
+    if (exName === "unknown") {
+        filename = args.name as string
+        filename = [urlifyText(filename), ext].join(".")
+    }
+
     const fieldTags: FieldTags = { ...args }
     delete fieldTags._
     try {
-        if (typeof args.folder === "string") {
-            let f: string = args.folder
-            if (f.endsWith("/")) f = f.substring(0, args.folder.length - 1)
+        let folder = args.folder
+        delete args.folder
+        delete args.name
+        if (typeof folder === "string") {
+            folder = urlifyText(folder)
+            let f: string = folder
+            if (f.endsWith("/")) f = f.substring(0, folder.length - 1)
             if (f.startsWith("/")) f = f.substring(1)
-            args.folder = f
+            folder = f
             filename = [f, filename].join("/")
         }
         const link = await upload(filename, file!.attachment as Readable)
-        await upsertEntry(link, filename, args.folder, args)
+        await upsertEntry(link, filename, folder, args)
         const t: (string | number)[][] = [
             ["filename", ":", filename],
             ["link", ":", link],
@@ -128,6 +144,9 @@ export default async function uploadCommand(message: Message, cmd: string) {
         await message.channel.send(
             `fail to upload image, reason: \`\`\`\n${e?.message || e || "unknown failure"}\`\`\``
         )
-        userLog(message, `fail to upload image`, "error", { reason: e?.message || e || "unknown failure" })
+        userLog(message, `fail to upload image`, "error", {
+            reason: e?.message || e,
+            error: e,
+        })
     }
 }

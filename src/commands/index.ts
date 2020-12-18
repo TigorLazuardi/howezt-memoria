@@ -1,7 +1,7 @@
 import logger from "@infra/logger"
 import { Message } from "discord.js"
 import helpCommand from "./help"
-import { currentLogCommand, commandLogs as logsCommand } from "./logs"
+import { commandLogs as logsCommand, currentLogCommand } from "./logs"
 import moveCommand, { exitChannelCommand } from "./move"
 import uploadCommand from "./upload"
 import { hasCommand, notImplementedYet, split, withLog, withRoomRestriction } from "./util"
@@ -20,7 +20,8 @@ export const commands: CommandCenter = {
     },
     upload: {
         action: withRoomRestriction(uploadCommand),
-        shortDesc: "Upload image to a private server",
+        shortDesc:
+            "Upload image to a private server. Does not support multi-image, only first image file will be processed.",
     },
     search: {
         action: withRoomRestriction(notImplementedYet),

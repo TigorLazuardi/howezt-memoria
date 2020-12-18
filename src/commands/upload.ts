@@ -1,12 +1,12 @@
 import { upload } from "@repo/minio"
-import { upsertEntry } from "@repo/mongodb"
+import { UpsertEntry, upsertEntry } from "@repo/mongodb"
 import { Message } from "discord.js"
 import { Readable } from "stream"
 import textTable from "text-table"
 import yargsParser from "yargs-parser"
 import { arrayContainsArray, checkIfMapStringStringOrNumber, split, urlifyText, userLog } from "./util"
 
-interface FieldTags {
+export interface FieldTags {
     name?: string
     folder?: string
     [key: string]: any
@@ -47,6 +47,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
     // When the user just call !hm_upload without any args or attachments
     if (!rest.length && !message.attachments.size) {
         await message.channel.send(description)
+        userLog(message, "asked upload help", cmd)
         return
     }
 
@@ -56,7 +57,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
         await message.channel.send(
             "Bad argument(s) on parsing. Only text or number should be value of argument. Please use `!hm_upload` without any arguments for more info"
         )
-        userLog(message, "bad arguments: keys have unsupported types", "error", args)
+        userLog(message, "bad arguments: keys have unsupported types", cmd, "error", args)
         return
     }
     const [__, ...fields] = Object.keys(args)
@@ -65,14 +66,14 @@ export default async function uploadCommand(message: Message, cmd: string) {
         await message.channel.send(
             `Failed to parse the argument in the message. Please use \`!hm_upload\` without any arguments for more info`
         )
-        userLog(message, "bad arguments: no keys at all", "error", args)
+        userLog(message, "bad arguments: no keys at all", cmd, "error", args)
         return
     }
 
     // When the user has arguments but does not upload any files
     if (!message.attachments.size) {
         await message.channel.send(`Please upload an image`)
-        userLog(message, "no images set")
+        userLog(message, cmd, "no images set")
         return
     }
 
@@ -84,6 +85,8 @@ export default async function uploadCommand(message: Message, cmd: string) {
         userLog(message, "user does not set --name key", "error")
         return
     }
+
+    const name = args.name as string
 
     const isAllImages = message.attachments.every(
         (att) =>
@@ -103,7 +106,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
 
     if (!isAllImages) {
         await message.channel.send(`Please only an image. Supported image is PNG and JPEG`)
-        userLog(message, "fails to upload because file is not png or jpeg", "error", { filename })
+        userLog(message, "fails to upload because file is not png or jpeg", cmd, "error", { filename })
         return
     }
 
@@ -112,12 +115,10 @@ export default async function uploadCommand(message: Message, cmd: string) {
         filename = [urlifyText(filename), ext].join(".")
     }
 
-    const fieldTags: FieldTags = { ...args }
-    delete fieldTags._
+    const fieldTags: UpsertEntry = { ...args }
+    fieldTags._ = undefined
     try {
         let folder = args.folder
-        delete args.folder
-        delete args.name
         if (typeof folder === "string") {
             folder = urlifyText(folder)
             let f: string = folder
@@ -127,8 +128,8 @@ export default async function uploadCommand(message: Message, cmd: string) {
             filename = [f, filename].join("/")
         }
         const link = await upload(filename, file!.attachment as Readable)
-        await upsertEntry(link, filename, folder, args)
-        const t: (string | number)[][] = [
+        await upsertEntry({ name, folder, link, filename, ...fieldTags })
+        const t: any[][] = [
             ["filename", ":", filename],
             ["link", ":", link],
         ]
@@ -139,12 +140,12 @@ export default async function uploadCommand(message: Message, cmd: string) {
 
         const replyMeta = textTable(t)
         await message.channel.send(`success upload.\`\`\`\n${replyMeta}\`\`\``)
-        userLog(message, `success upload`, "info", { filename, link })
+        userLog(message, `success upload`, cmd, "info", { filename, link })
     } catch (e) {
         await message.channel.send(
             `fail to upload image, reason: \`\`\`\n${e?.message || e || "unknown failure"}\`\`\``
         )
-        userLog(message, `fail to upload image`, "error", {
+        userLog(message, `fail to upload image`, cmd, "error", {
             reason: e?.message || e,
             error: e,
         })

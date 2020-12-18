@@ -3,6 +3,7 @@ import { Message } from "discord.js"
 import helpCommand from "./help"
 import { commandLogs as logsCommand, currentLogCommand } from "./logs"
 import moveCommand, { exitChannelCommand } from "./move"
+import searchCommand from "./search"
 import uploadCommand from "./upload"
 import { hasCommand, notImplementedYet, split, withLog, withRoomRestriction } from "./util"
 
@@ -24,7 +25,7 @@ export const commands: CommandCenter = {
             "Upload image to a private server. Does not support multi-image, only first image file will be processed.",
     },
     search: {
-        action: withRoomRestriction(notImplementedYet),
+        action: withRoomRestriction(searchCommand),
         shortDesc: "Search images according to tags or queries",
     },
     random: {

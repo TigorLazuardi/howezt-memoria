@@ -26,6 +26,7 @@ class Logger {
                         filename: "logs/%DATE%.log",
                         datePattern: "YYYY-MM-DD",
                         maxFiles: "14d",
+                        maxSize: "8mb",
                         createSymlink: true,
                     }),
                 ],

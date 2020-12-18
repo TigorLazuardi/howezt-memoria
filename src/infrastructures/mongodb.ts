@@ -1,11 +1,12 @@
-import { MongoClient, MongoClientOptions } from "mongodb"
+import { MongoClient, MongoClientOptions, ObjectID } from "mongodb"
 
 export interface ImageCollection {
+    _id: ObjectID
     name: string
     link: string
     filename: string
-    folder?: string
-    metadata?: object
+    folder: string
+    metadata: { [key: string]: any }
 }
 
 class Mongo {

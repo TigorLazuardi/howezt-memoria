@@ -16,23 +16,26 @@ export interface SearchQuery {
     [key: string]: string | number | undefined
 }
 
+export interface UpsertEntry {
+    name?: string
+    link?: string
+    filename?: string
+    folder?: string
+    [key: string]: string | number | undefined
+}
+
 /**
  * @param link the link uploaded to minio
  * @param filename the name for the entry for primary searching index
  * @param metadata the metadata for the entry. Used for help searching index
  */
-export async function upsertEntry(
-    link: string,
-    filename: string,
-    folder = "",
-    metadata?: { [key: string]: any }
-): Promise<string> {
+export async function upsertEntry({ name, link, filename, folder, ...metadata }: UpsertEntry): Promise<string> {
     const result = await mongo.db.updateOne(
         { filename },
         {
             $set: {
                 link,
-                name: metadata?.name || filename,
+                name: name || filename,
                 folder,
                 metadata,
             },
@@ -52,7 +55,7 @@ export async function deleteEntryByID(_id: string | number): Promise<void> {
     await mongo.db.deleteOne({ _id: new ObjectID(_id) })
 }
 
-export async function search({ _id, query, limit = 5, ...rest }: SearchQuery) {
+export async function search({ _id, query, limit = 5, page = 0, folder = "", ...rest }: SearchQuery) {
     const result: ImageCollection[] = []
     if (_id) {
         const id = new ObjectID(_id)
@@ -75,22 +78,18 @@ export async function search({ _id, query, limit = 5, ...rest }: SearchQuery) {
     const pipeline: object[] = [
         {
             $match: {
-                $text: query,
+                $or: [
+                    { name: { $regex: query, $options: "i" } },
+                    { folder: { $regex: query, $options: "i" } },
+                    { filename: { $regex: query, $options: "i" } },
+                ],
             },
         },
     ]
 
-    if (rest.folder) {
-        pipeline.push({
-            $match: {
-                folder: rest.folder,
-            },
-        })
-    }
+    if (folder) pipeline.push({ $match: { folder } })
 
-    // don't include name and folder metadata. Already done in the first two pipeline
-    delete rest.name
-    delete rest.folder
+    pipeline.push({ $sort: { name: 1, folder: 1, filename: 1 } })
 
     // Check for metadata
     const keys = Object.keys(rest)
@@ -111,21 +110,19 @@ export async function search({ _id, query, limit = 5, ...rest }: SearchQuery) {
         pipeline.push({ $match: target })
     }
 
+    pipeline.push({ $skip: parseInt(page.toString()) * limit })
     pipeline.push({ $limit: limit })
 
     const m = await mongo.db.aggregate(pipeline)
-    m.forEach((x) => result.push(x))
+    await m.forEach((x) => {
+        console.log(x)
+        result.push(x)
+    })
     return result
 }
 
 export async function index() {
-    await mongo.db.createIndex(
-        [
-            ["name", "text"],
-            ["filename", "text"],
-        ],
-        { name: "search index" }
-    )
+    await mongo.db.createIndex({ name: 1 }, { name: "name index" })
     await mongo.db.createIndex(
         {
             filename: 1,

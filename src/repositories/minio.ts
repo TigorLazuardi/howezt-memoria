@@ -8,6 +8,7 @@ import { Readable } from "stream"
  */
 export function upload(filename: string, file: Readable | Buffer | string): Promise<string> {
     return new Promise((resolve, reject) => {
+        console.log(file)
         minio.client.putObject(HOWEZT, filename, file, (err) => {
             if (err) return reject(err)
             resolve(`${minio.host}:${minio.port}/${HOWEZT}/${filename}`)

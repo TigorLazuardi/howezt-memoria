@@ -56,7 +56,9 @@ export const withLog = (cmdFunc: (m: Message, c: string) => Promise<void>, msg: 
     cmd: string
 ) => {
     await cmdFunc(message, cmd)
-    logger.log.info(`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`)
+    logger.log.info(`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
+        command: cmd,
+    })
 }
 
 /**
@@ -98,20 +100,28 @@ export function checkIfMapStringStringOrNumber(obj: { readonly [key: string]: an
 export function userLog(
     message: Message,
     msg: string,
+    cmd: string,
     type: "info" | "error" | "warn" | "emerg" | "debug" = "info",
     data?: { [key: string]: any }
 ) {
-    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, data)
+    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
+        ...data,
+        command: cmd,
+    })
 }
 
 export async function sendWithLog(
     message: Message,
     msg: string,
+    cmd: string,
     type: "info" | "error" | "warn" | "emerg" | "debug" = "info",
     data?: { [key: string]: any }
 ) {
     await message.channel.send(msg)
-    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, data)
+    logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
+        command: cmd,
+        data,
+    })
 }
 
 /**

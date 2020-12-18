@@ -1,6 +1,6 @@
 import { search } from "@repo/mongodb"
-import { Message } from "discord.js"
-import textTable from "text-table"
+import Case from "case"
+import { Message, MessageEmbed } from "discord.js"
 import yargsParser from "yargs-parser"
 import { FieldTags } from "./upload"
 import { sendWithLog, split, userLog } from "./util"
@@ -67,10 +67,11 @@ export default async function searchCommand(message: Message, cmd: string) {
     }
     const _id: string | number | undefined = args.id || args._id
 
-    const fieldTags: FieldTags = { ...args }
-    fieldTags._ = void 0
-    console.log(fieldTags)
-
+    const fieldTags: FieldTags = {}
+    for (const key in args) {
+        if (key === "_" || key === "$0") continue
+        fieldTags[key] = args[key]
+    }
     try {
         const result = await search({
             ...fieldTags,
@@ -78,7 +79,6 @@ export default async function searchCommand(message: Message, cmd: string) {
             limit,
             _id,
         })
-        console.log(result)
         if (!result.length) {
             await sendWithLog(message, "no image found with such query", cmd, "error", {
                 fields: fieldTags,
@@ -89,23 +89,27 @@ export default async function searchCommand(message: Message, cmd: string) {
             })
             return
         }
-        result.forEach(async (e) => {
-            const reply: string[] = []
-            const metas: string[][] = []
-            for (const key in e.metadata) {
-                metas.push([key, ":", e.metadata[key] || ""])
-            }
-            const placeholder: string[][] = [
-                ["```"],
-                ["id", ":", e._id.toHexString()],
-                ["filename", ":", e.filename],
-                ["folder", ":", e.folder ? e.folder : "[root]"],
-                ...metas,
-                ["```"],
-            ]
-            reply.push(textTable(placeholder))
-            reply.push(e.link)
-            await message.channel.send(reply.join("\n"))
+        result.forEach(async (doc) => {
+            const embed = new MessageEmbed()
+                .setColor("#0099FF")
+                .setTitle(Case.title(doc.name))
+                .setURL(doc.link)
+                .setThumbnail(doc.link)
+                .addFields(
+                    { name: "ID", value: doc._id },
+                    { name: "Name", value: doc.name },
+                    { name: "Folder", value: doc.folder || "[root]" },
+                    { name: "Filename", value: doc.filename },
+                    { name: "Created At", value: doc.created_at_human || "null" },
+                    { name: "Updated At", value: doc.updated_at_human || "null" }
+                )
+
+            const b = Object.keys(doc.metadata)
+            b.forEach((key) => {
+                embed.addField(Case.title(key), doc.metadata[key] || "null")
+            })
+            embed.setImage(doc.link).setTimestamp().setFooter("Howezt Memoria", doc.link)
+            await message.channel.send(embed)
         })
     } catch (e) {
         await sendWithLog(

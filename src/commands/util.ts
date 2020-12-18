@@ -1,6 +1,8 @@
 import logger from "@infra/logger"
 import RoomMap from "@src/room"
 import { Message } from "discord.js"
+import { IncomingMessage } from "http"
+import { get } from "https"
 import { PREFIX } from "./prefix"
 
 /**
@@ -134,4 +136,6 @@ export function urlifyText(text: string | number) {
         .replace(/^_+|_+$/, "")
 }
 
-export async function rollback(filename: string) {}
+export function fetchImage(url: string): Promise<IncomingMessage> {
+    return new Promise((resolve) => get(url, resolve))
+}

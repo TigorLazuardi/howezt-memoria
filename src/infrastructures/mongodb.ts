@@ -6,6 +6,10 @@ export interface ImageCollection {
     link: string
     filename: string
     folder: string
+    updated_at: string
+    updated_at_human: string
+    created_at: string
+    created_at_human: string
     metadata: { [key: string]: any }
 }
 

@@ -29,8 +29,14 @@ export interface UpsertEntry {
  * @param filename the name for the entry for primary searching index
  * @param metadata the metadata for the entry. Used for help searching index
  */
-export async function upsertEntry({ name, link, filename, folder, ...metadata }: UpsertEntry): Promise<string> {
-    const result = await mongo.db.updateOne(
+export async function upsertEntry({
+    name,
+    link,
+    filename,
+    folder,
+    ...metadata
+}: UpsertEntry): Promise<ImageCollection> {
+    const result = await mongo.db.findOneAndUpdate(
         { filename },
         {
             $set: {
@@ -38,13 +44,20 @@ export async function upsertEntry({ name, link, filename, folder, ...metadata }:
                 name: name || filename,
                 folder,
                 metadata,
+                updated_at: Math.floor(Date.now() / 1000).toString(),
+                updated_at_human: new Date().toString().substring(0, 24),
+            },
+            $setOnInsert: {
+                created_at: Math.floor(Date.now() / 1000).toString(),
+                created_at_human: new Date().toString().substring(0, 24),
             },
         },
         {
             upsert: true,
+            returnOriginal: false,
         }
     )
-    return result.upsertedId._id.toHexString()
+    return result.value!
 }
 
 export async function deleteEntryByFilename(filename: string): Promise<void> {
@@ -89,7 +102,7 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
 
     if (folder) pipeline.push({ $match: { folder } })
 
-    pipeline.push({ $sort: { name: 1, folder: 1, filename: 1 } })
+    pipeline.push({ $sort: { folder: 1, name: 1, filename: 1 } })
 
     // Check for metadata
     const keys = Object.keys(rest)
@@ -115,7 +128,6 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
 
     const m = await mongo.db.aggregate(pipeline)
     await m.forEach((x) => {
-        console.log(x)
         result.push(x)
     })
     return result

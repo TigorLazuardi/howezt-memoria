@@ -1,5 +1,6 @@
 import { upload } from "@repo/minio"
 import { UpsertEntry, upsertEntry } from "@repo/mongodb"
+import { BOT_LOGO_URL } from "@src/glossary"
 import Case from "case"
 import { Message, MessageEmbed } from "discord.js"
 import yargsParser from "yargs-parser"
@@ -125,21 +126,21 @@ export default async function uploadCommand(message: Message, cmd: string) {
             .setTitle("Success Upload")
             .setDescription(Case.title(doc.name))
             .setURL(doc.link)
-            .setThumbnail(doc.link)
+            .setThumbnail(BOT_LOGO_URL)
             .addFields(
                 { name: "ID", value: doc._id },
                 { name: "Name", value: doc.name },
                 { name: "Folder", value: doc.folder || "[root]" },
                 { name: "Filename", value: doc.filename },
                 { name: "Created At", value: doc.created_at_human || "null" },
-                { name: "Updated At", value: doc.updated_at_human || "null" }
+                { name: "Last Update", value: doc.updated_at_human || "null" }
             )
 
         const b = Object.keys(doc.metadata)
         b.forEach((key) => {
             embed.addField(Case.title(key), doc.metadata[key] || "null")
         })
-        embed.setImage(doc.link).setTimestamp().setFooter("Howezt Memoria", doc.link)
+        embed.setImage(doc.link).setTimestamp().setFooter("Howezt Memoria", BOT_LOGO_URL)
         await message.channel.send(embed)
         userLog(message, `success upload`, cmd, "info", { doc })
     } catch (e: unknown) {

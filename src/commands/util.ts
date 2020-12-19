@@ -1,8 +1,13 @@
 import logger from "@infra/logger"
+import { ImageCollection } from "@infra/mongodb"
+import { client } from "@src/app"
+import { BOT_LOGO_URL } from "@src/glossary"
 import RoomMap from "@src/room"
-import { Message } from "discord.js"
+import Case from "case"
+import { Message, MessageEmbed } from "discord.js"
 import { IncomingMessage } from "http"
 import { get } from "https"
+import yargsParser from "yargs-parser"
 import { PREFIX } from "./prefix"
 
 /**
@@ -138,4 +143,49 @@ export function urlifyText(text: string | number) {
 
 export function fetchImage(url: string): Promise<IncomingMessage> {
     return new Promise((resolve) => get(url, resolve))
+}
+
+export function genEmbed(doc: ImageCollection) {
+    const embed = new MessageEmbed()
+        .setColor("#0099FF")
+        .setTitle(Case.title(doc.name))
+        .setURL(doc.link)
+        .setThumbnail(BOT_LOGO_URL)
+        .addFields(
+            { name: "ID", value: doc._id },
+            { name: "Name", value: doc.name },
+            { name: "Link", value: doc.link },
+            { name: "Folder", value: doc.folder || "[root]" },
+            { name: "Filename", value: doc.filename },
+            { name: "Created At", value: doc.created_at_human || "null" },
+            { name: "Last Update", value: doc.updated_at_human || "null" }
+        )
+        .setImage(doc.link)
+        .setTimestamp()
+        .setFooter("Howezt Memoria", BOT_LOGO_URL)
+
+    for (const key in doc.metadata) {
+        embed.addField(Case.title(key), doc.metadata[key] || "null")
+    }
+    return embed
+}
+
+export function blackListKeys(args: yargsParser.Arguments, keys: string[]) {
+    const result: { [key: string]: any } = {}
+    for (const k of Object.keys(args)) {
+        if (keys.includes(k)) continue
+        result[k] = args[k]
+    }
+    return result
+}
+
+export function getChannelTarget(channel: string) {
+    let str: string
+    let ch = channel.match(/<#(\w+)>/)
+    if (ch && typeof ch[1] === "string") {
+        str = ch[1]
+    } else {
+        throw new Error("bad channel id")
+    }
+    return client.channels.cache.get(str)
 }

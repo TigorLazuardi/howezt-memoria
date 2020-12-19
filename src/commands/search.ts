@@ -1,10 +1,8 @@
 import { search } from "@repo/mongodb"
-import { BOT_LOGO_URL } from "@src/glossary"
-import Case from "case"
-import { Message, MessageEmbed } from "discord.js"
+import { Message } from "discord.js"
 import yargsParser from "yargs-parser"
 import { FieldTags } from "./upload"
-import { sendWithLog, split, userLog } from "./util"
+import { blackListKeys, genEmbed, sendWithLog, split, userLog } from "./util"
 
 const DESCRIPTION = `!hm_search searches for images on database.
 
@@ -68,11 +66,7 @@ export default async function searchCommand(message: Message, cmd: string) {
     }
     const _id: string | number | undefined = args.id || args._id
 
-    const fieldTags: FieldTags = {}
-    for (const key in args) {
-        if (key === "_" || key === "$0") continue
-        fieldTags[key] = args[key]
-    }
+    const fieldTags: FieldTags = blackListKeys(args, ["_", "$0", "channel"])
     try {
         const result = await search({
             ...fieldTags,
@@ -91,25 +85,7 @@ export default async function searchCommand(message: Message, cmd: string) {
             return
         }
         result.forEach(async (doc) => {
-            const embed = new MessageEmbed()
-                .setColor("#0099FF")
-                .setTitle(Case.title(doc.name))
-                .setURL(doc.link)
-                .setThumbnail(BOT_LOGO_URL)
-                .addFields(
-                    { name: "ID", value: doc._id },
-                    { name: "Name", value: doc.name },
-                    { name: "Folder", value: doc.folder || "[root]" },
-                    { name: "Filename", value: doc.filename },
-                    { name: "Created At", value: doc.created_at_human || "null" },
-                    { name: "Last Update", value: doc.updated_at_human || "null" }
-                )
-
-            const b = Object.keys(doc.metadata)
-            b.forEach((key) => {
-                embed.addField(Case.title(key), doc.metadata[key] || "null")
-            })
-            embed.setImage(doc.link).setTimestamp().setFooter("Howezt Memoria", BOT_LOGO_URL)
+            const embed = genEmbed(doc)
             await message.channel.send(embed)
         })
     } catch (e) {

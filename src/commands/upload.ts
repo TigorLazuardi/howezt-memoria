@@ -1,10 +1,8 @@
 import { upload } from "@repo/minio"
-import { UpsertEntry, upsertEntry } from "@repo/mongodb"
-import { BOT_LOGO_URL } from "@src/glossary"
-import Case from "case"
-import { Message, MessageEmbed } from "discord.js"
+import { upsertEntry } from "@repo/mongodb"
+import { Message } from "discord.js"
 import yargsParser from "yargs-parser"
-import { checkIfMapStringStringOrNumber, fetchImage, split, urlifyText, userLog } from "./util"
+import { blackListKeys, checkIfMapStringStringOrNumber, fetchImage, genEmbed, split, urlifyText, userLog } from "./util"
 
 export interface FieldTags {
     name?: string
@@ -84,7 +82,6 @@ export default async function uploadCommand(message: Message, cmd: string) {
 
     if (typeof args.filename === "string" || typeof args.filename === "number") {
         filename = [urlifyText(args.filename), ext].join(".")
-        delete args.filename
     }
 
     if (!isAllImages) {
@@ -99,48 +96,25 @@ export default async function uploadCommand(message: Message, cmd: string) {
     }
 
     // Required for loop to ditch '_' key by yargs
-    const fieldTags: UpsertEntry = {}
-    for (const key in args) {
-        if (key === "_" || key === "$0") continue
-        fieldTags[key] = args[key]
-    }
+    const fieldTags = blackListKeys(args, ["_", "$0", "filename", "channel"])
 
+    // Since uploading photo is slow, we need to send a feedback to user.
     await message.channel.send(`Uploading photo... please wait...`)
     try {
-        let folder = args.folder as string
+        let folder = fieldTags.folder as string
         if (typeof folder === "string" || typeof folder === "number") {
             folder = urlifyText(folder)
             let f: string = folder
             if (f.endsWith("/")) f = f.substring(0, folder.length - 1)
             if (f.startsWith("/")) f = f.substring(1)
             folder = f
-            filename = [f, filename].join("/")
         } else {
             folder = ""
         }
         const img = await fetchImage(file.url)
-        const link = await upload(filename, img)
-        const doc = await upsertEntry({ name, folder, link, filename, ...fieldTags })
-        const embed = new MessageEmbed()
-            .setColor("#0099FF")
-            .setTitle("Success Upload")
-            .setDescription(Case.title(doc.name))
-            .setURL(doc.link)
-            .setThumbnail(BOT_LOGO_URL)
-            .addFields(
-                { name: "ID", value: doc._id },
-                { name: "Name", value: doc.name },
-                { name: "Folder", value: doc.folder || "[root]" },
-                { name: "Filename", value: doc.filename },
-                { name: "Created At", value: doc.created_at_human || "null" },
-                { name: "Last Update", value: doc.updated_at_human || "null" }
-            )
-
-        const b = Object.keys(doc.metadata)
-        b.forEach((key) => {
-            embed.addField(Case.title(key), doc.metadata[key] || "null")
-        })
-        embed.setImage(doc.link).setTimestamp().setFooter("Howezt Memoria", BOT_LOGO_URL)
+        const link = await upload([folder, filename].join("/"), img)
+        const doc = await upsertEntry({ ...fieldTags, name, folder, link, filename })
+        const embed = genEmbed(doc)
         await message.channel.send(embed)
         userLog(message, `success upload`, cmd, "info", { doc })
     } catch (e: unknown) {

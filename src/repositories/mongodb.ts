@@ -24,6 +24,11 @@ export interface UpsertEntry {
     [key: string]: string | number | undefined
 }
 
+export interface QueryResult {
+    data: ImageCollection[]
+    total: number
+}
+
 /**
  * @param link the link uploaded to minio
  * @param filename the name for the entry for primary searching index
@@ -123,6 +128,12 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
         pipeline.push({ $match: target })
     }
 
+    pipeline.push({
+        $facet: {
+            data: [{ $skip: parseInt(page.toString()) * limit }, { $limit: limit }],
+            meta: [],
+        },
+    })
     pipeline.push({ $skip: parseInt(page.toString()) * limit })
     pipeline.push({ $limit: limit })
 

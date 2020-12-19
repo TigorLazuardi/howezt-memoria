@@ -1,5 +1,5 @@
-import discord from "discord.js"
 import logger from "@infra/logger"
+import discord from "discord.js"
 import handleMessage from "./message"
 
 export const client = new discord.Client()

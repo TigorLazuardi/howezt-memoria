@@ -1,9 +1,10 @@
-import { Client, Message } from "discord.js"
-import { PREFIX } from "./commands/prefix"
-import commands from "./commands"
-import RoomMap from "./room"
-import withRecovery from "./recovery"
 import logger from "@infra/logger"
+import { Client, Message } from "discord.js"
+import yargsParser from "yargs-parser"
+import commands from "./commands"
+import { PREFIX } from "./commands/prefix"
+import withRecovery from "./recovery"
+import RoomMap from "./room"
 
 export default function (client: Client) {
     function hasPrefix(str: string) {
@@ -15,6 +16,8 @@ export default function (client: Client) {
     }
     client.on("message", (message) => {
         withRecovery(async () => {
+            console.log(message.content)
+            console.log(yargsParser(message.content))
             if (message.author.bot) return
             try {
                 switch (true) {

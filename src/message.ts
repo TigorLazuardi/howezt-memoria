@@ -28,7 +28,7 @@ export default function (client: Client) {
                 }
             } catch (e) {
                 await message.channel.send(e?.message || e || "something happened with the bot")
-                logger.log.error(e?.message || (e as string) || "something happened with the bot")
+                logger.log.emerg(e?.message || (e as string) || "something happened with the bot")
             }
         })
     })

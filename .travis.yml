@@ -8,12 +8,10 @@ services:
   - docker
     
 before_install:
-  - user="$DOCKER_USERNAME"
-  - pass="$DOCKER_PASSWORD"
   - image="$DOCKER_USERNAME/howezt-memoria:latest"
-  - echo "$pass" | docker login -u "$user" --password-stdin
-  - docker pull $image || true
-  - docker build -t $image --cache-from $image
-  - docker push $image
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker pull "$DOCKER_USERNAME/howezt-memoria:latest" || true
+  - docker build -t $image --cache-from "$DOCKER_USERNAME/howezt-memoria:latest"
+  - docker push "$DOCKER_USERNAME/howezt-memoria:latest"
   
 

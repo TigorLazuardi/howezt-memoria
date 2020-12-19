@@ -1,8 +1,19 @@
+language: ruby
+
+branches:
+  only:
+    - "main"
+
 services:
   - docker
     
-deploy:
-  provider: script
-  script: bash deploy/docker_push.sh
-  on:
-    branch: main
+before_install:
+  - user="$DOCKER_USERNAME"
+  - pass="$DOCKER_PASSWORD"
+  - image="$DOCKER_USERNAME/howezt-memoria:latest"
+  - echo "$pass" | docker login -u "$user" --password-stdin
+  - docker pull $image || true
+  - docker build -t $image --cache-from $image
+  - docker push $image
+  
+

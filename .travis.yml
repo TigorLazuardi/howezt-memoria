@@ -9,7 +9,7 @@ services:
     
 before_install:
   - image="$DOCKER_USERNAME/howezt-memoria:latest"
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
   - docker pull "$DOCKER_USERNAME/howezt-memoria:latest" || true
   - docker build -t $image --cache-from "$DOCKER_USERNAME/howezt-memoria:latest"
   - docker push "$DOCKER_USERNAME/howezt-memoria:latest"

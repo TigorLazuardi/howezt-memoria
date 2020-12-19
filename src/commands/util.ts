@@ -57,19 +57,6 @@ export const withRoomRestriction = (cmdFunc: (m: Message, c: string) => Promise<
 }
 
 /**
- * Middleware function to add log at the end of the command function
- */
-export const withLog = (cmdFunc: (m: Message, c: string) => Promise<void>, msg: string) => async (
-    message: Message,
-    cmd: string
-) => {
-    await cmdFunc(message, cmd)
-    logger.log.info(`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
-        command: cmd,
-    })
-}
-
-/**
  * Trims and splits message content by empty white space
  */
 export function split(message: Message) {

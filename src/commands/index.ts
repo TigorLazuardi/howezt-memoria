@@ -6,7 +6,7 @@ import moveCommand, { exitChannelCommand } from "./move"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, split, withLog, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, split, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
@@ -26,7 +26,7 @@ export const commands: CommandCenter = {
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
     },
     help: {
-        action: withRoomRestriction(withLog(helpCommand, "asked for help command")),
+        action: withRoomRestriction(helpCommand),
         shortDesc: "Show available commands and explain what they do",
     },
     logs: {
@@ -34,7 +34,7 @@ export const commands: CommandCenter = {
         shortDesc: "Get list of logs. give log filename to fetch the content",
     },
     move: {
-        action: withLog(moveCommand, "told the bot to move"),
+        action: moveCommand,
         shortDesc:
             "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
     },

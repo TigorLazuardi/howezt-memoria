@@ -1,6 +1,6 @@
 import fsExtra from "fs-extra"
 
-const CONFIG_PATH = "./rooms.json"
+const CONFIG_PATH = "./config/rooms.json"
 
 export interface RoomConfig {
     [key: string]: DiscordChannel
@@ -22,7 +22,7 @@ if (fsExtra.existsSync(CONFIG_PATH)) {
         RoomMap.set(key, data[key])
     }
 } else {
-    fsExtra.writeFileSync(CONFIG_PATH, "[]")
+    fsExtra.outputJSONSync(CONFIG_PATH, [])
 }
 
 export async function writeRoomMap() {

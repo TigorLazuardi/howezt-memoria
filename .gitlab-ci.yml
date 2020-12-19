@@ -1,40 +1,40 @@
-image: docker:20.10.01
+image: docker:19.03.12
 
 services:
-  - docker:20.10.01-dind
+    - docker:19.03.12-dind
 
 variables:
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_CERTDIR: '/certs'
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
 
 before_script:
-  - docker login -u $GITLAB_USERNAME -p $GITLAB_TOKEN registry.gitlab.com
+    - docker login -u $GITLAB_USERNAME -p $GITLAB_TOKEN registry.gitlab.com
 
 stages:
-  - deploy
+    - deploy
 
 deploy:
-  stage: deploy
-  only:
-    - main
-  script:
-    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest || true
-    - >
-      docker build
-      --cache-from $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
-      --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
-      --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH
+    stage: deploy
+    only:
+        - main
+    script:
+        - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest || true
+        - >
+            docker build
+            --cache-from $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
+            --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:latest
+            --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA .
+        - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH
 
 dev:
-  stage: deploy
-  only:
-    - development
-  script:
-    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev || true
-    - >
-      docker build
-      --cache-from $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev
-      --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev
-      --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH
+    stage: deploy
+    only:
+        - development
+    script:
+        - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev || true
+        - >
+            docker build
+            --cache-from $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev
+            --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:dev
+            --tag $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA .
+        - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH

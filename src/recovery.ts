@@ -7,7 +7,7 @@ const withRecovery = async (f: () => void | Promise<void>) => {
     try {
         await f()
     } catch (e) {
-        logger.log.alert(e?.message || e || "Uncaught exception")
+        logger.log.emerg(e?.message || e || "Uncaught exception")
     }
 }
 

@@ -1,5 +1,5 @@
 import minio from "@infra/minio"
-import { HOWEZT } from "@src/glossary"
+import { BUCKET } from "@src/glossary"
 import { Readable } from "stream"
 
 /**
@@ -8,16 +8,16 @@ import { Readable } from "stream"
  */
 export function upload(filename: string, file: Readable | Buffer | string): Promise<string> {
     return new Promise((resolve, reject) => {
-        minio.client.putObject(HOWEZT, filename, file, (err) => {
+        minio.client.putObject(BUCKET, filename, file, (err) => {
             if (err) return reject(err)
-            resolve(`${minio.host}:${minio.port}/${HOWEZT}/${filename}`)
+            resolve(`${minio.host}:${minio.port}/${BUCKET}/${filename}`)
         })
     })
 }
 
 export function deleteFile(filename: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        minio.client.removeObject(HOWEZT, filename, (err) => {
+        minio.client.removeObject(BUCKET, filename, (err) => {
             if (err) return reject(err)
             resolve()
         })
@@ -30,7 +30,7 @@ export function deleteFile(filename: string): Promise<void> {
  */
 export function getFile(filename: string): Promise<Readable> {
     return new Promise((resolve, reject) => {
-        minio.client.getObject(HOWEZT, filename, (e, result) => {
+        minio.client.getObject(BUCKET, filename, (e, result) => {
             if (e) return reject(e)
             resolve(result)
         })

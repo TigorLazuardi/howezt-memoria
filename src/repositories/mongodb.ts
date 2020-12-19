@@ -153,6 +153,27 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
     return result
 }
 
+export async function getRandom(limit = 5) {
+    const count = await mongo.db.estimatedDocumentCount()
+    const result = {
+        data: [] as ImageCollection[],
+        total: count,
+    }
+    const x = mongo.db.aggregate([
+        {
+            $sample: { size: limit },
+        },
+    ])
+
+    await x.forEach((doc) => result.data.push(doc))
+    return result
+}
+
+export async function rollback(...docs: ImageCollection[]) {
+    const targets = docs.map((x) => new ObjectID(x._id))
+    await mongo.db.deleteMany({ _id: { $in: targets } })
+}
+
 export async function index() {
     await mongo.db.createIndex({ name: 1 }, { name: "name index" })
     await mongo.db.createIndex(

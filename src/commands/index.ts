@@ -3,6 +3,7 @@ import { Message } from "discord.js"
 import helpCommand from "./help"
 import { commandLogs as logsCommand, currentLogCommand } from "./logs"
 import moveCommand, { exitChannelCommand } from "./move"
+import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
 import { hasCommand, notImplementedYet, split, withLog, withRoomRestriction } from "./util"
@@ -16,11 +17,11 @@ interface CommandCenter {
 
 export const commands: CommandCenter = {
     current_log: {
-        action: withRoomRestriction(withLog(currentLogCommand, "asked for current log")),
+        action: withRoomRestriction(currentLogCommand),
         shortDesc: "Get latest logs",
     },
     exit_channel: {
-        action: withRoomRestriction(withLog(exitChannelCommand, "told the bot to exit room")),
+        action: withRoomRestriction(exitChannelCommand),
         shortDesc:
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
     },
@@ -38,7 +39,7 @@ export const commands: CommandCenter = {
             "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
     },
     random: {
-        action: withRoomRestriction(notImplementedYet),
+        action: withRoomRestriction(randomCommand),
         shortDesc: "Get random images from stored database",
     },
     search: {

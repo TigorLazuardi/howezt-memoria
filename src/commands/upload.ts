@@ -2,7 +2,7 @@ import { upload } from "@repo/minio"
 import { upsertEntry } from "@repo/mongodb"
 import { Message } from "discord.js"
 import yargsParser from "yargs-parser"
-import { blackListKeys, checkIfMapStringStringOrNumber, fetchImage, genEmbed, split, urlifyText, userLog } from "./util"
+import { blackListKeys, checkWhitelisTypes, fetchImage, genEmbed, split, urlifyText, userLog } from "./util"
 
 export interface FieldTags {
     name?: string
@@ -51,7 +51,14 @@ export default async function uploadCommand(message: Message, cmd: string) {
     }
 
     const args = yargsParser(rest.join(" "))
-    const ok = checkIfMapStringStringOrNumber(args)
+
+    if (args.help || args.h) {
+        await message.channel.send(description)
+        userLog(message, "asked upload help", cmd, "info", { args })
+        return
+    }
+
+    const ok = checkWhitelisTypes(args, ["string", "number"])
     if (!ok) {
         await message.channel.send(
             "Bad argument(s) on parsing. Only text or number should be value of argument. Please use `!hm_upload` without any arguments for more info"
@@ -63,7 +70,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
     // When the user has arguments but does not upload any files
     if (!message.attachments.size) {
         await message.channel.send(`Please upload an image`)
-        userLog(message, cmd, "no images set")
+        userLog(message, "no images set", cmd, "error", args)
         return
     }
 
@@ -86,7 +93,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
 
     if (!isAllImages) {
         await message.channel.send(`Please only an image. Supported image is PNG and JPEG`)
-        userLog(message, "fails to upload because file is not png or jpeg", cmd, "error", { filename })
+        userLog(message, "fails to upload because file is not png or jpeg", cmd, "error", { filename, args })
         return
     }
 
@@ -116,13 +123,13 @@ export default async function uploadCommand(message: Message, cmd: string) {
         const doc = await upsertEntry({ ...fieldTags, name, folder, link, filename })
         const embed = genEmbed(doc)
         await message.channel.send(embed)
-        userLog(message, `success upload`, cmd, "info", { doc })
+        userLog(message, `success upload`, cmd, "info", { doc, args })
     } catch (e: unknown) {
         const err = e as Error
         await message.channel.send(
             `fail to upload image, reason: \`\`\`\n${err?.message || err || "unknown failure"}\`\`\``
         )
-        userLog(message, `fail to upload image`, cmd, "error", {
+        userLog(message, `fail to upload image`, cmd, "emerg", {
             reason: err?.message || err,
             error: err,
             trace: err.stack || "no stack trace",

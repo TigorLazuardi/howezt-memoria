@@ -36,7 +36,7 @@ class Mongo {
     }
 
     get db() {
-        return this._client!.db("howezt").collection<ImageCollection>("files")
+        return this._client!.db("howezt").collection<ImageCollection>(process.env.MONGODB_COLLECTION!)
     }
 }
 

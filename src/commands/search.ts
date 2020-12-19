@@ -1,9 +1,8 @@
 import { search } from "@repo/mongodb"
-import { BOT_LOGO_URL } from "@src/glossary"
-import { Channel, Message, MessageEmbed } from "discord.js"
+import { Channel, Message } from "discord.js"
 import yargsParser from "yargs-parser"
 import { FieldTags } from "./upload"
-import { blackListKeys, genEmbed, getChannelTarget, sendWithLog, split, userLog } from "./util"
+import { blackListKeys, genEmbed, genResultQueryEmbed, getChannelTarget, sendWithLog, split, userLog } from "./util"
 
 const DESCRIPTION = `!hm_search searches for images on database.
 
@@ -51,6 +50,12 @@ export default async function searchCommand(message: Message, cmd: string) {
     }
 
     const args = yargsParser(rest.join(" "))
+
+    if (args.help || args.h) {
+        await message.channel.send(DESCRIPTION)
+        userLog(message, "asked search help", cmd, "info", { args })
+        return
+    }
 
     if (!args._.length) {
         await message.channel.send(
@@ -132,23 +137,15 @@ export default async function searchCommand(message: Message, cmd: string) {
         if (baseline < 1) baseline = 1
         let next = (page + 1) * limit
         const total = result.meta.total
-        const embed = new MessageEmbed()
-            .setTitle("Search Result")
-            .setDescription(`Showing results from ${page * limit + 1} to ${next > total ? total : next}`)
-            .addFields(
-                { name: "Page", value: page + 1, inline: true },
-                { name: "Available Pages", value: Math.ceil(result.meta.total / baseline), inline: true },
-                { name: "Images Shown", value: limit > result.meta.total ? result.meta.total : limit, inline: true },
-                { name: "Total Images Found", value: result.meta.total, inline: true }
-            )
-            .setThumbnail(BOT_LOGO_URL)
-            .setTimestamp()
-            .setFooter("Howezt Memoria", BOT_LOGO_URL)
-
-        if (channelTarget) {
-            // @ts-ignore
-            embed.addField("Target Channel", channelTarget.name)
-        }
+        const embed = genResultQueryEmbed(
+            {
+                total: total,
+                description: `Showing results from ${page * limit + 1} to ${next > total ? total : next}`,
+                page,
+                limit,
+            },
+            channelTarget
+        )
         if (channelTarget) {
             // It is supported by discord, but it doesn't by typescript. so we ignore the typecheck
             // @ts-ignore
@@ -156,7 +153,9 @@ export default async function searchCommand(message: Message, cmd: string) {
         } else {
             await message.channel.send(embed)
         }
+        userLog(message, "success sending images", cmd, "info", { args, total_documents: total, page, limit })
     } catch (e) {
+        const err = e as Error
         await sendWithLog(
             message,
             `something failed when searching images. reason: ${e?.message || e || "unknown"}`,
@@ -170,6 +169,7 @@ export default async function searchCommand(message: Message, cmd: string) {
                 limit,
                 _id,
                 error: e?.message || e,
+                trace: err?.stack || "no stack trace",
             }
         )
     }

@@ -1,46 +1,64 @@
-import logger from "@infra/logger"
-import { Message } from "discord.js"
+import { Message, MessageAttachment } from "discord.js"
 import FsExtra from "fs-extra"
 import readline from "readline"
-import { split } from "./util"
 import { Readable } from "stream"
-import { MessageAttachment } from "discord.js"
+import yargsParser from "yargs-parser"
+import { sendWithLog, split, userLog } from "./util"
+
+const CURRENT_LOG_DESCRIPTION = `Gets the content of current log and upload the file to the channel.
+There's no arguments to this command.`
+
+const COMMAND_LOG_DESCRIPTION = `Gets list of logs if not given any arguments. Use \`!hm_logs filename.log\` to fetch the log`
 
 export async function commandLogs(message: Message, cmd: string) {
-    const splits = split(message)
-    if (splits.length > 1) {
+    const [_, ...rest] = split(message)
+    const args = yargsParser(rest)
+    if (args.help) {
+        await message.channel.send(COMMAND_LOG_DESCRIPTION)
+        userLog(message, "ask command log help", cmd, "info", { args })
+        return
+    }
+    if (args._.length) {
+        const file = args._[0]
         try {
-            const log = await readLog(splits[1])
-            const att = new MessageAttachment(getLog(splits[1]), splits[1])
+            const log = await readLog(file)
+            const att = new MessageAttachment(getLog(file), file)
             await message.channel.send(`\`\`\`log\n${log}\`\`\``, att)
+            userLog(message, `sending log file ${file}`, cmd, "info", { args })
         } catch (e) {
-            await message.channel.send(e?.message || e || `error when trying to read file \`${splits[1]}\``)
+            await sendWithLog(message, e?.message || e || `error when trying to read file \`${file}\``, cmd, "error", {
+                args,
+            })
         }
-        logger.log.info(
-            `${message.author.username}/${message.member?.nickname} (${message.author.id}) asked for log with filename ${splits[1]}`
-        )
         return
     }
     const dir = await FsExtra.readdir("logs")
     const logs = dir.filter((file) => file.endsWith(".log")).reverse()
+    // remove current.log from the list
     logs.shift()
-    const l = logs.map((l, i) => `${i + 1}. ${l}`)
+    const l = logs.map((logName, i) => `${i + 1}. ${logName}`)
     await message.channel.send(`Current available logs:
 \`\`\`\n${l.join("\n")}\`\`\`
 Use \`!hm_logs filename.log\` to fetch the contents of the log`)
-    logger.log.info(
-        `${message.author.username}/${message.member?.nickname} (${message.author.id}) asked for list of logs`
-    )
+    userLog(message, `asked for list of logs`, cmd)
 }
 
 export async function currentLogCommand(message: Message, cmd: string) {
     const filename = "current.log"
+    const [_, ...rest] = split(message)
+    const args = yargsParser(rest)
+    if (args.help) {
+        await message.channel.send(CURRENT_LOG_DESCRIPTION)
+        userLog(message, "asked for current log command help", cmd, "info", { args })
+        return
+    }
     try {
         const log = await readLog(filename)
         const att = new MessageAttachment(getLog(filename))
         await message.channel.send(`\`\`\`log\n${log}\`\`\``, att)
+        userLog(message, "asked for current log", cmd, "info")
     } catch (e) {
-        await message.channel.send(e?.message || e || `error when trying to read file \`current.log\``)
+        await sendWithLog(message, e?.message || e || `error when trying to read file \`current.log\``, cmd)
     }
 }
 

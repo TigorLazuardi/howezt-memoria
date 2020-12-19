@@ -4,9 +4,10 @@ import { client } from "@src/app"
 import { BOT_LOGO_URL } from "@src/glossary"
 import RoomMap from "@src/room"
 import Case from "case"
-import { Message, MessageEmbed } from "discord.js"
+import { Channel, Message, MessageEmbed } from "discord.js"
 import { IncomingMessage } from "http"
 import { get } from "https"
+import { TypeOfTag } from "typescript"
 import yargsParser from "yargs-parser"
 import { PREFIX } from "./prefix"
 
@@ -89,9 +90,9 @@ export function arrayContainsArray(superset: ReadonlyArray<any>, subset: Readonl
 /**
  * check if object passed only has string or number of values
  */
-export function checkIfMapStringStringOrNumber(obj: { readonly [key: string]: any }): boolean {
+export function checkIfMapStringStringOrNumber(obj: yargsParser.Arguments): boolean {
     for (const key in obj) {
-        if (key === "_") continue
+        if (key === "_" || key === "$0") continue
         switch (typeof obj[key]) {
             case "number":
                 continue
@@ -99,6 +100,32 @@ export function checkIfMapStringStringOrNumber(obj: { readonly [key: string]: an
                 continue
             default:
                 return false
+        }
+    }
+    return true
+}
+
+/**
+ * check if object passed has blacklisted types
+ */
+export function checkBlacklistTypes(obj: yargsParser.Arguments, blacklist: TypeOfTag[]): boolean {
+    for (const key in obj) {
+        if (key === "_" || key === "$0") continue
+        if (blacklist.includes(typeof obj[key])) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * check if object passed has only whitelisted types
+ */
+export function checkWhitelisTypes(obj: yargsParser.Arguments, whitelist: TypeOfTag[]): boolean {
+    for (const key in obj) {
+        if (key === "_" || key === "$0") continue
+        if (!whitelist.includes(typeof obj[key])) {
+            return false
         }
     }
     return true
@@ -112,8 +139,8 @@ export function userLog(
     data?: { [key: string]: any }
 ) {
     logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
-        ...data,
         command: cmd,
+        ...data,
     })
 }
 
@@ -127,7 +154,7 @@ export async function sendWithLog(
     await message.channel.send(msg)
     logger.log[type](`${message.author.username}/${message.member?.nickname} (${message.author.id}) ${msg}`, {
         command: cmd,
-        data,
+        ...data,
     })
 }
 
@@ -166,6 +193,48 @@ export function genEmbed(doc: ImageCollection) {
 
     for (const key in doc.metadata) {
         embed.addField(Case.title(key), doc.metadata[key] || "null")
+    }
+    return embed
+}
+
+interface ResultQueryEmbed {
+    total: number
+    description: string
+    page?: number
+    limit?: number
+    [key: string]: string | number | undefined
+}
+
+export function genResultQueryEmbed(
+    { total, description, page, limit, ...rest }: ResultQueryEmbed,
+    channelTarget?: Channel
+) {
+    const embed = new MessageEmbed()
+        .setTitle("Search Result")
+        .setDescription(description)
+        .addField("Total Images in Database", total, true)
+        .setThumbnail(BOT_LOGO_URL)
+        .setTimestamp()
+        .setFooter("Howezt Memoria", BOT_LOGO_URL)
+
+    if (page) {
+        embed.addField("Page", page + 1, true)
+    }
+    if (limit) {
+        embed.addField("Limit", limit, true)
+        embed.addField("Images Shown", limit > total ? total : limit, true)
+    }
+    if (page && limit) {
+        let baseline = page * limit
+        if (baseline <= 0) baseline = 1
+        embed.addField("Available Pages", Math.ceil(total / baseline), true)
+    }
+    if (channelTarget) {
+        // @ts-ignore
+        embed.addField("Target Channel", channelTarget.name)
+    }
+    for (const key in rest) {
+        embed.addField(Case.title(key), rest[key], true)
     }
     return embed
 }

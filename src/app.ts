@@ -1,35 +1,38 @@
+require("dotenv").config()
+
 import logger from "@infra/logger"
-import discord from "discord.js"
-import handleMessage from "./message"
+import minio from "@infra/minio"
+import mongo from "@infra/mongodb"
+import { index } from "@repo/mongodb"
+import { ClientOptions } from "minio"
+import startApp from "./discord"
 
-export const client = new discord.Client()
+const token = process.env.BOT_TOKEN || ""
 
-client.once("ready", () => {
-    logger.log.info("discord bot running")
-    client.user?.setPresence({
-        status: "online",
-        activity: {
-            name: "Ping this bot for help",
-        },
-    })
-})
-
-export default (token: string) => {
-    client.login(token)
+const minioOptions: ClientOptions = {
+    endPoint: process.env.MINIO_HOST!,
+    port: Number(process.env.MINIO_PORT) || 9000,
+    accessKey: process.env.MINIO_ACCESS_KEY!,
+    secretKey: process.env.MINIO_SECRET_KEY!,
+    useSSL: false,
 }
 
-handleMessage(client)
+minio.initialize(minioOptions)
+logger.log.info(`connected to minio`)
 
-client.on("error", logger.log.error)
-
-const exit = () => {
-    logger.log.info("app exited")
-    client.destroy()
-    logger.log.info("exit status 0", () => {
-        process.exit(0)
+mongo
+    .initialize()
+    .catch((err) => {
+        logger.log.emerg(err)
+        process.exit(1)
     })
-}
+    .then(() => {
+        logger.log.info(`connected to mongodb`)
+        return index()
+    })
+    .catch(logger.log.error)
+    .then(() => logger.log.info(`indexes configured`))
 
-process.on("SIGINT", exit)
-process.on("SIGHUP", exit)
-process.on("SIGTERM", exit)
+startApp(token)
+
+export default {}

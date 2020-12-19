@@ -1,6 +1,6 @@
 import logger from "@infra/logger"
 import { ImageCollection } from "@infra/mongodb"
-import { client } from "@src/app"
+import { client } from "@src/discord"
 import { BOT_LOGO_URL } from "@src/glossary"
 import RoomMap from "@src/room"
 import Case from "case"

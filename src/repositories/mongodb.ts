@@ -24,9 +24,9 @@ export interface UpsertEntry {
     [key: string]: string | number | undefined
 }
 
-export interface QueryResult {
+export interface SearchQueryResult {
     data: ImageCollection[]
-    total: number
+    meta: { total: number }
 }
 
 /**
@@ -74,12 +74,14 @@ export async function deleteEntryByID(_id: string | number): Promise<void> {
 }
 
 export async function search({ _id, query, limit = 5, page = 0, folder = "", ...rest }: SearchQuery) {
-    const result: ImageCollection[] = []
     if (_id) {
         const id = new ObjectID(_id)
         const res = await mongo.db.findOne({ _id: id })
         if (!res) throw new MongoError(`cannot found document with _id ${_id}`)
-        result.push(res)
+        const result: SearchQueryResult = {
+            data: [res],
+            meta: { total: 1 },
+        }
         return result
     }
 
@@ -128,18 +130,25 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
         pipeline.push({ $match: target })
     }
 
-    pipeline.push({
-        $facet: {
-            data: [{ $skip: parseInt(page.toString()) * limit }, { $limit: limit }],
-            meta: [],
+    pipeline.push(
+        {
+            $facet: {
+                data: [{ $skip: parseInt(page.toString()) * limit }, { $limit: limit }],
+                meta: [{ $count: "total" }],
+            },
         },
-    })
-    pipeline.push({ $skip: parseInt(page.toString()) * limit })
-    pipeline.push({ $limit: limit })
+        {
+            $unwind: "$meta",
+        }
+    )
 
-    const m = await mongo.db.aggregate(pipeline)
+    const m = await mongo.db.aggregate<SearchQueryResult>(pipeline)
+    let result: SearchQueryResult = {
+        data: [],
+        meta: { total: 0 },
+    }
     await m.forEach((x) => {
-        result.push(x)
+        result = x
     })
     return result
 }

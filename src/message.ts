@@ -1,6 +1,5 @@
 import logger from "@infra/logger"
 import { Client, Message } from "discord.js"
-import yargsParser from "yargs-parser"
 import commands from "./commands"
 import { PREFIX } from "./commands/prefix"
 import withRecovery from "./recovery"
@@ -16,8 +15,6 @@ export default function (client: Client) {
     }
     client.on("message", (message) => {
         withRecovery(async () => {
-            console.log(message.content)
-            console.log(yargsParser(message.content))
             if (message.author.bot) return
             try {
                 switch (true) {

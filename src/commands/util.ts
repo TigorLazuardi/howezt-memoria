@@ -179,7 +179,7 @@ export function blackListKeys(args: yargsParser.Arguments, keys: string[]) {
     return result
 }
 
-export function getChannelTarget(channel: string) {
+export function getChannelTarget(channel: string = "") {
     let str: string
     let ch = channel.match(/<#(\w+)>/)
     if (ch && typeof ch[1] === "string") {

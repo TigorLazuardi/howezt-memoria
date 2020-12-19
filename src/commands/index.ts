@@ -15,40 +15,45 @@ interface CommandCenter {
 }
 
 export const commands: CommandCenter = {
-    help: {
-        action: withRoomRestriction(withLog(helpCommand, "asked for help command")),
-        shortDesc: "Show available commands and explain what they do",
-    },
-    upload: {
-        action: withRoomRestriction(uploadCommand),
-        shortDesc:
-            "Upload image to a private server. Does not support multi-image, only first image file will be processed.",
-    },
-    search: {
-        action: withRoomRestriction(searchCommand),
-        shortDesc: "Search images according to tags or queries",
-    },
-    random: {
-        action: withRoomRestriction(notImplementedYet),
-        shortDesc: "Get random images from stored database",
-    },
-    move: {
-        action: withLog(moveCommand, "told the bot to move"),
-        shortDesc:
-            "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
+    current_log: {
+        action: withRoomRestriction(withLog(currentLogCommand, "asked for current log")),
+        shortDesc: "Get latest logs",
     },
     exit_channel: {
         action: withRoomRestriction(withLog(exitChannelCommand, "told the bot to exit room")),
         shortDesc:
             "Tell bot to 'exit' channel, and acknowledge command inputs from all channels where the bot can read",
     },
+    help: {
+        action: withRoomRestriction(withLog(helpCommand, "asked for help command")),
+        shortDesc: "Show available commands and explain what they do",
+    },
     logs: {
         action: withRoomRestriction(logsCommand),
         shortDesc: "Get list of logs. give log filename to fetch the content",
     },
-    current_log: {
-        action: withRoomRestriction(withLog(currentLogCommand, "asked for current log")),
-        shortDesc: "Get latest logs",
+    move: {
+        action: withLog(moveCommand, "told the bot to move"),
+        shortDesc:
+            "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
+    },
+    random: {
+        action: withRoomRestriction(notImplementedYet),
+        shortDesc: "Get random images from stored database",
+    },
+    search: {
+        action: withRoomRestriction(searchCommand),
+        shortDesc: "Search images according to tags or queries",
+    },
+    upload: {
+        action: withRoomRestriction(uploadCommand),
+        shortDesc:
+            "Upload image to a private server. Does not support multi-image, only first image file will be processed.",
+    },
+    folder: {
+        action: withRoomRestriction(notImplementedYet),
+        shortDesc:
+            "List images in a folder. If no query is given, root folder will be searched. Type !hm_folder --help to show how to use query.",
     },
 }
 

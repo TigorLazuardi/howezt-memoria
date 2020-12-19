@@ -22,7 +22,7 @@ if (fsExtra.existsSync(CONFIG_PATH)) {
         RoomMap.set(key, data[key])
     }
 } else {
-    fsExtra.outputJSONSync(CONFIG_PATH, [])
+    fsExtra.outputJSONSync(CONFIG_PATH, {})
 }
 
 export async function writeRoomMap() {

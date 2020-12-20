@@ -1,5 +1,3 @@
-if (process.env.NODE_ENV === "development") require("dotenv").config()
-
 import logger from "@infra/logger"
 import minio from "@infra/minio"
 import mongo from "@infra/mongodb"

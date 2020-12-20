@@ -22,7 +22,7 @@
         "forceConsistentCasingInFileNames": true,
         "incremental": true,
         "assumeChangesOnlyAffectDirectDependencies": true,
-        // "allowSyntheticDefaultImports": true,
+        "allowSyntheticDefaultImports": true,
         "paths": {
             "@commands/*": ["src/commands/*"],
             "@infra/*": ["src/infrastructures/*"],

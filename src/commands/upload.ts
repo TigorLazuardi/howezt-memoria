@@ -2,6 +2,7 @@ import { upload } from "@repo/minio"
 import { upsertEntry } from "@repo/mongodb"
 import { Message } from "discord.js"
 import yargsParser from "yargs-parser"
+import { PREFIX } from "./prefix"
 import { blackListKeys, checkWhitelisTypes, fetchImage, genEmbed, split, urlifyText, userLog } from "./util"
 
 export interface FieldTags {
@@ -10,18 +11,18 @@ export interface FieldTags {
     [key: string]: any
 }
 
-const description = `!hm_upload uploads an image to private server.
+const description = `${PREFIX}upload uploads an image to private server.
 
 Bot supoprts arguments to handle the upload way. Any non argument values will be parsed as the name of the photo.
 
 Arguments comes in key-value pair. \`Keys\` start with double dashes "--". The bot supports following syntaxes:
 
-1. \`!hm_upload name of the photo\`
-1. \`!hm_upload name of the photo --key=value\`
-2. \`!hm_upload name of the photo --key value\`
-3. \`!hm_upload name of the photo --key="value with spaces"\`
-4. \`!hm_upload name of the photo --key "value with spaces"\`
-5. \`!hm_upload name of the photo --key1 "value" --key2="value"\`
+1. \`${PREFIX}upload name of the photo\`
+1. \`${PREFIX}upload name of the photo --key=value\`
+2. \`${PREFIX}upload name of the photo --key value\`
+3. \`${PREFIX}upload name of the photo --key="value with spaces"\`
+4. \`${PREFIX}upload name of the photo --key "value with spaces"\`
+5. \`${PREFIX}upload name of the photo --key1 "value" --key2="value"\`
 
 Bot only supports text or number values, other values received like booleans or arrays and bot will return an error message.
 
@@ -43,7 +44,7 @@ http://206.189.149.81:9000/howezt/_examples/Discord_HtjvYlfl4l.png
 export default async function uploadCommand(message: Message, cmd: string) {
     const [_, ...rest] = split(message)
 
-    // When the user just call !hm_upload without any args or attachments
+    // When the user just call ${PREFIX}upload without any args or attachments
     if (!rest.length && !message.attachments.size) {
         await message.channel.send(description)
         userLog(message, "asked upload help", cmd)
@@ -61,7 +62,7 @@ export default async function uploadCommand(message: Message, cmd: string) {
     const ok = checkWhitelisTypes(args, ["string", "number"])
     if (!ok) {
         await message.channel.send(
-            "Bad argument(s) on parsing. Only text or number should be value of argument. Please use `!hm_upload` without any arguments for more info"
+            `Bad argument(s) on parsing. Only text or number should be value of argument. Please use \`${PREFIX}upload\` without any arguments for more info`
         )
         userLog(message, "bad arguments: keys have unsupported types", cmd, "error", args)
         return

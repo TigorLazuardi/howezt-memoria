@@ -1,6 +1,7 @@
 import fsExtra from "fs-extra"
+import path from "path"
 
-const CONFIG_PATH = "./config/rooms.json"
+const CONFIG_PATH = path.resolve(__dirname, "../config/rooms.json")
 
 export interface RoomConfig {
     [key: string]: DiscordChannel

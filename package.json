@@ -9,7 +9,7 @@
         "clean": "rimraf dist",
         "dev": "NODE_ENV=development npm run concurrent",
         "watch-build": "tsc --watch",
-        "watch-run": "node-dev dist/index.js",
+        "watch-run": "nodemon --watch dist --ignore config/* dist/index.js",
         "concurrent": "npm run build && concurrently \"npm:watch-*\"",
         "dev_windows": "set NODE_ENV=development && npm run concurrent",
         "start": "npm run clean && npm run build && node dist/index.js"
@@ -40,7 +40,8 @@
     "devDependencies": {
         "concurrently": "^5.3.0",
         "dotenv": "^8.2.0",
-        "node-dev": "^6.2.0"
+        "node-dev": "^6.2.0",
+        "nodemon": "^2.0.6"
     },
     "_moduleAliases": {
         "@src": "dist",

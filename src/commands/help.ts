@@ -18,6 +18,6 @@ Type the command with \`--help\` argument to get detailed information about the 
 
 **Example**:
 \`\`\`
-!hm_random --help
+${PREFIX}random --help
 \`\`\``)
 }

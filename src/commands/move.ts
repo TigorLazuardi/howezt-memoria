@@ -1,12 +1,13 @@
 import RoomMap, { writeRoomMap } from "@src/room"
 import { Message } from "discord.js"
 import yargsParser from "yargs-parser"
+import { PREFIX } from "./prefix"
 import { sendWithLog, split, userLog } from "./util"
 
-const MOVE_COMAND_DESCRIPTION = `!hm_move restrict the bot to the channel where this command runs.
+const MOVE_COMAND_DESCRIPTION = `${PREFIX}move restrict the bot to the channel where this command runs.
 The bot will not respond to any other chat room in the same server if set, even if it have read write permission to the channel.`
 
-const EXIT_COMMAND_DESCRIPTION = `!hm_exit_channel unrestrict the bot and let it acknowledge commands from other channels that it has read/write permission to`
+const EXIT_COMMAND_DESCRIPTION = `${PREFIX}exit_channel unrestrict the bot and let it acknowledge commands from other channels that it has read/write permission to`
 
 export default async function moveCommand(message: Message, cmd: string) {
     const [_, ...rest] = split(message)

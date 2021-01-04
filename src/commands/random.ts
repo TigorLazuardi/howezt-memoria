@@ -1,6 +1,7 @@
 import { getRandom } from "@repo/mongodb"
 import { Channel, Message } from "discord.js"
 import yargsParser from "yargs-parser"
+import { PREFIX } from "./prefix"
 import {
     checkWhitelisTypes,
     genEmbed,
@@ -11,20 +12,20 @@ import {
     userLog,
 } from "./util"
 
-const DESCRIPTION = `!hm_random sets the bot to do random search for images on the database, and will return maximum 5 images. Duplicate images may be returned.
+const DESCRIPTION = `${PREFIX}random sets the bot to do random search for images on the database, and will return maximum 5 images. Duplicate images may be returned.
 Add \`--channel [channel name] \` argument to set the bot output to other channel that the bot can write to.
 
 __Example Usage__:
     
 **Get Random images**:
 \`\`\`
-!hm_random
+${PREFIX}random
 \`\`\`
 Will do random search on the database and return maximum 5 images.
     
 **Get Random Images and Send Them to Other Channel**. Please make sure to reference the channel and not merely a plain text:
 \`\`\`
-!hm_random --channel #general-chat
+${PREFIX}random --channel #general-chat
 \`\`\``
 
 export async function randomCommand(message: Message, cmd: string): Promise<void> {
@@ -41,7 +42,7 @@ export async function randomCommand(message: Message, cmd: string): Promise<void
 
     if (!ok) {
         await message.channel.send(
-            "Bad argument(s) on parsing. Only text or number should be value of argument. Please use `!hm_random --help` without any arguments for more info"
+            `Bad argument(s) on parsing. Only text or number should be value of argument. Please use \`${PREFIX}random --help\` without any arguments for more info`
         )
         userLog(message, "bad arguments: keys have unsupported types", cmd, "error", args)
         return
@@ -79,10 +80,13 @@ export async function randomCommand(message: Message, cmd: string): Promise<void
             }
         })
         await Promise.all(promises)
-        const queryEmbed = genResultQueryEmbed({
-            total: result.total,
-            description: "Search Random Result",
-        })
+        const queryEmbed = genResultQueryEmbed(
+            {
+                total: result.total,
+                description: "Search Random Result",
+            },
+            channelTarget
+        )
         if (channelTarget) {
             // @ts-ignore
             await channelTarget.send(queryEmbed)

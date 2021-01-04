@@ -3,12 +3,13 @@ import FsExtra from "fs-extra"
 import readline from "readline"
 import { Readable } from "stream"
 import yargsParser from "yargs-parser"
+import { PREFIX } from "./prefix"
 import { sendWithLog, split, userLog } from "./util"
 
 const CURRENT_LOG_DESCRIPTION = `Gets the content of current log and upload the file to the channel.
 There's no arguments to this command.`
 
-const COMMAND_LOG_DESCRIPTION = `Gets list of logs if not given any arguments. Use \`!hm_logs filename.log\` to fetch the log`
+const COMMAND_LOG_DESCRIPTION = `Gets list of logs if not given any arguments. Use \`${PREFIX}logs filename.log\` to fetch the log`
 
 export async function commandLogs(message: Message, cmd: string) {
     const [_, ...rest] = split(message)
@@ -39,7 +40,7 @@ export async function commandLogs(message: Message, cmd: string) {
     const l = logs.map((logName, i) => `${i + 1}. ${logName}`)
     await message.channel.send(`Current available logs:
 \`\`\`\n${l.join("\n")}\`\`\`
-Use \`!hm_logs filename.log\` to fetch the contents of the log`)
+Use \`${PREFIX}logs filename.log\` to fetch the contents of the log`)
     userLog(message, `asked for list of logs`, cmd)
 }
 

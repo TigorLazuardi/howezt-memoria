@@ -130,10 +130,11 @@ export async function search({ _id, query, limit = 5, page = 0, folder = "", ...
         pipeline.push({ $match: target })
     }
 
+    const $skip = (page as number) * limit
     pipeline.push(
         {
             $facet: {
-                data: [{ $skip: parseInt(page.toString()) * limit }, { $limit: limit }],
+                data: [{ $skip }, { $limit: limit }],
                 meta: [{ $count: "total" }],
             },
         },

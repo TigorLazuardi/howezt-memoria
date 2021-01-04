@@ -193,7 +193,7 @@ interface ResultQueryEmbed {
 }
 
 export function genResultQueryEmbed(
-    { total, description, page, limit, ...rest }: ResultQueryEmbed,
+    { total, description, page = 0, limit = 0, ...rest }: ResultQueryEmbed,
     channelTarget?: Channel
 ) {
     const embed = new MessageEmbed()
@@ -204,15 +204,25 @@ export function genResultQueryEmbed(
         .setTimestamp()
         .setFooter("Howezt Memoria", BOT_LOGO_URL)
 
+    limit = limit as number
+    let imageShown: number
+    if (limit > total) {
+        imageShown = total
+    } else if ((page + 1) * limit > total) {
+        imageShown = total % limit
+    } else {
+        imageShown = limit
+    }
     if (page) {
         embed.addField("Page", page + 1, true)
     }
     if (limit) {
         embed.addField("Limit", limit, true)
-        embed.addField("Images Shown", limit > total ? total : limit, true)
     }
-    if (page && limit) {
-        let baseline = page * limit
+    if (imageShown) {
+        embed.addField("Images Shown", imageShown || 5, true)
+        if (page <= 0) page = 1
+        let baseline = page * limit || 1
         if (baseline <= 0) baseline = 1
         embed.addField("Available Pages", Math.ceil(total / baseline), true)
     }

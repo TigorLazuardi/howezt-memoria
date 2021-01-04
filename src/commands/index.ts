@@ -3,6 +3,7 @@ import { Message } from "discord.js"
 import helpCommand from "./help"
 import { commandLogs as logsCommand, currentLogCommand } from "./logs"
 import moveCommand, { exitChannelCommand } from "./move"
+import { PREFIX } from "./prefix"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
@@ -53,8 +54,7 @@ export const commands: CommandCenter = {
     },
     folder: {
         action: withRoomRestriction(notImplementedYet),
-        shortDesc:
-            "List images in a folder. If no query is given, root folder will be searched. Type !hm_folder --help to show how to use query.",
+        shortDesc: `List images in a folder. If no query is given, root folder will be searched. Type ${PREFIX}folder --help to show how to use query.`,
     },
 }
 
@@ -67,7 +67,7 @@ export default async function handleCommand(message: Message) {
             return
         }
     }
-    await message.channel.send("Unknown command. type `!hm_help` for more info")
+    await message.channel.send(`Unknosn command. type \`${PREFIX}help\` for more info`)
     const [cmd] = split(message)
     logger.log.info(
         `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`

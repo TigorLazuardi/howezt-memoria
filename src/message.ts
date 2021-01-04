@@ -40,10 +40,10 @@ async function replyPingBot(message: Message) {
     if (r) {
         if (r.in_room) {
             if (message.channel.id === r.channel_id) {
-                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease type \`!hm_help\` for more info.`)
+                await message.channel.send(`Hi <@${message.member?.id}>!\nPlease type \`${PREFIX}help\` for more info.`)
             } else {
                 await message.channel.send(
-                    `Hi <@${message.member?.id}>! I can be called on room <#${r.channel_id}>.\nPlease type \`!hm_help\` over there.`
+                    `Hi <@${message.member?.id}>! I can be called on room <#${r.channel_id}>.\nPlease type \`${PREFIX}help\` over there.`
                 )
             }
             logger.log.info(
@@ -53,7 +53,7 @@ async function replyPingBot(message: Message) {
         }
     }
     await message.channel.send(
-        `Hi <@${message.member?.id}>!\nI am not placed in any room yet. Please, type \`!hm_help\` for help.`
+        `Hi <@${message.member?.id}>!\nI am not placed in any room yet. Please, type \`${PREFIX}help\` for help.`
     )
     logger.log.info(
         `${message.author.username}/${message.member?.nickname} (${message.author.id}) pings the bot when bot is not in any channel`

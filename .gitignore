@@ -115,7 +115,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-rooms.json
 .tags
 
+# This folder contains runtime configs for persistence on deployments
 config/

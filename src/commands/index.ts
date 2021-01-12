@@ -7,7 +7,7 @@ import { PREFIX } from "./prefix"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, split, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {

@@ -119,3 +119,4 @@ dist
 
 # This folder contains runtime configs for persistence on deployments
 config/
+rooms.json

@@ -7,7 +7,7 @@ import { PREFIX } from "./prefix"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, split, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
@@ -67,9 +67,12 @@ export default async function handleCommand(message: Message) {
             return
         }
     }
-    await message.channel.send(`Unknosn command. type \`${PREFIX}help\` for more info`)
-    const [cmd] = split(message)
-    logger.log.info(
-        `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`
-    )
+    const s = async (message: Message, cmd: string) => {
+        await message.channel.send(`Unknown command. type \`${PREFIX}help\` for more info`)
+        logger.log.info(
+            `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`
+        )
+    }
+
+    withRoomRestriction(s)
 }

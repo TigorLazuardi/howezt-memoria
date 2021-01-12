@@ -7,7 +7,7 @@ import { PREFIX } from "./prefix"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, split, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
@@ -73,7 +73,6 @@ export default async function handleCommand(message: Message) {
             `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`
         )
     }
-
     const [cmd] = split(message)
     withRoomRestriction(s)(message, cmd)
 }

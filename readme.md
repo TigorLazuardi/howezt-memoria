@@ -27,7 +27,7 @@ They are required to be set when running the app.
 
 # Available Commands
 
-Commands are actions the bot can take. They are preceded with BOT*CHAT_PREFIX. So if BOT_CHAT_PREFIX is `!hm*`Then the command becomes`!hm_current_log`
+Commands are actions the bot can take. They are preceded with `BOT_CHAT_PREFIX`. So if `BOT_CHAT_PREFIX` is `!hm` Then the command becomes`!hm_current_log`
 
 | command      | description                                                                                                                         |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |

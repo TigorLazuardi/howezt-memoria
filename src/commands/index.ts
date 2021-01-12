@@ -7,7 +7,7 @@ import { PREFIX } from "./prefix"
 import { randomCommand } from "./random"
 import searchCommand from "./search"
 import uploadCommand from "./upload"
-import { hasCommand, notImplementedYet, withRoomRestriction } from "./util"
+import { hasCommand, notImplementedYet, split, withRoomRestriction } from "./util"
 
 interface CommandCenter {
     [key: string]: {
@@ -37,7 +37,7 @@ export const commands: CommandCenter = {
     move: {
         action: moveCommand,
         shortDesc:
-            "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role the channel",
+            "[Global command] Restrict this bot to the channel this command runs. Requires bot to have read-write access role for the channel target (bot must be able to read the command in the target channel)",
     },
     random: {
         action: withRoomRestriction(randomCommand),
@@ -68,11 +68,12 @@ export default async function handleCommand(message: Message) {
         }
     }
     const s = async (message: Message, cmd: string) => {
-        await message.channel.send(`Unknown command. type \`${PREFIX}help\` for more info`)
+        await message.channel.send(`Unknown command: \`${cmd}\`. type \`${PREFIX}help\` for more info`)
         logger.log.info(
             `${message.author.username}/${message.member?.nickname} (${message.author.id}) calls for unsupported command: ${cmd}`
         )
     }
 
-    withRoomRestriction(s)
+    const [cmd] = split(message)
+    withRoomRestriction(s)(message, cmd)
 }

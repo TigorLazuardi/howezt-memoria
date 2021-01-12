@@ -18,15 +18,15 @@ Bot supoprts arguments to handle the upload way. Any non argument values will be
 Arguments comes in key-value pair. \`Keys\` start with double dashes "--". The bot supports following syntaxes:
 
 1. \`${PREFIX}upload name of the photo\`
-1. \`${PREFIX}upload name of the photo --key=value\`
-2. \`${PREFIX}upload name of the photo --key value\`
-3. \`${PREFIX}upload name of the photo --key="value with spaces"\`
-4. \`${PREFIX}upload name of the photo --key "value with spaces"\`
-5. \`${PREFIX}upload name of the photo --key1 "value" --key2="value"\`
+2. \`${PREFIX}upload name of the photo --key=value\`
+3. \`${PREFIX}upload name of the photo --key value\`
+4. \`${PREFIX}upload name of the photo --key="value with spaces"\`
+5. \`${PREFIX}upload name of the photo --key "value with spaces"\`
+6. \`${PREFIX}upload name of the photo --key1 "value" --key2="value"\`
 
-Bot only supports text or number values, other values received like booleans or arrays and bot will return an error message.
+Bot only supports text or number values, other values received like booleans or arrays, the bot will return an error message.
 
-Optional Unique keys that are treated differently are as follows:
+***Optional Unique*** keys that are treated differently are as follows:
 
 1. \`--folder\` puts the image in a folder in the server.
 
